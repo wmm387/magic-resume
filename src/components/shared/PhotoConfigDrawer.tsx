@@ -515,10 +515,10 @@ const PhotoConfigDrawer: React.FC<Props> = ({
                         {radius === "none"
                           ? t("config.borderRadius.none")
                           : radius === "medium"
-                          ? t("config.borderRadius.medium")
-                          : radius === "full"
-                          ? t("config.borderRadius.full")
-                          : t("config.borderRadius.custom")}
+                            ? t("config.borderRadius.medium")
+                            : radius === "full"
+                              ? t("config.borderRadius.full")
+                              : t("config.borderRadius.custom")}
                       </Button>
                     )
                   )}

@@ -75,6 +75,7 @@ const CustomField: React.FC<CustomFieldProps> = ({
               label: value,
             })
           }
+          aria-label={field.label}
           placeholder={t("customFields.placeholders.label")}
           className={cn(
             "bg-background/50",
@@ -91,6 +92,7 @@ const CustomField: React.FC<CustomFieldProps> = ({
               value: value,
             })
           }
+          aria-label={field.label}
           placeholder={t("customFields.placeholders.value")}
           className={cn(
             "bg-background/50",
@@ -316,6 +318,7 @@ const BasicPanel: React.FC = () => {
                 }
                 placeholder={`请输入${field.label}`}
                 type={field.type}
+                aria-label={field.label}
               />
             </div>
           </div>

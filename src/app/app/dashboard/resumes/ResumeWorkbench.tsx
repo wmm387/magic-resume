@@ -9,7 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { useResumeStore } from "@/store/useResumeStore";
 import { DEFAULT_TEMPLATES } from "@/config";
-import { CreateResumeModal } from "./CreateResumeModal";
+import { CreateResumeDrawer } from "./CreateResumeDrawer";
 import { ResumeCardItem } from "./ResumeCardItem";
 
 export const ResumeWorkbench = () => {
@@ -150,7 +150,7 @@ export const ResumeWorkbench = () => {
                     </div>
                 </motion.div>
 
-                <CreateResumeModal
+                <CreateResumeDrawer
                     open={isCreateModalOpen}
                     onOpenChange={setIsCreateModalOpen}
                     onCreate={handleCreateFromModal}

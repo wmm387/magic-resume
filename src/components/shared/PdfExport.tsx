@@ -1,17 +1,14 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useTranslations } from "@/i18n/compat/client";
 import {
   Download,
   Loader2,
-  FileJson,
-  Printer,
   ChevronDown
 } from "lucide-react";
 import { RiMarkdownLine } from "@remixicon/react";
 import { useResumeStore } from "@/store/useResumeStore";
 import { Button } from "@/components/ui/button";
-import { exportResumeAsJson, exportResumeAsMarkdown, exportToPdf } from "@/utils/export";
-import { exportResumeToBrowserPrint } from "@/utils/print";
+import { exportResumeAsMarkdown, exportToPdf } from "@/utils/export";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,17 +38,6 @@ const PdfExport = () => {
     });
   };
 
-  const handleJsonExport = () => {
-    exportResumeAsJson({
-      resume: activeResume,
-      title,
-      onStart: () => setIsExportingJson(true),
-      onEnd: () => setIsExportingJson(false),
-      successMessage: t("toast.jsonSuccess"),
-      errorMessage: t("toast.jsonError")
-    });
-  };
-
   const handleMarkdownExport = () => {
     exportResumeAsMarkdown({
       resume: activeResume,
@@ -74,21 +60,6 @@ const PdfExport = () => {
     });
   };
 
-  const handlePrint = async () => {
-    const resumeContent = document.getElementById("resume-preview");
-    if (!resumeContent) {
-      console.error("Resume content not found");
-      return;
-    }
-
-    const pagePadding = globalSettings?.pagePadding || 0;
-    await exportResumeToBrowserPrint(
-      resumeContent,
-      pagePadding,
-      globalSettings?.fontFamily
-    );
-  };
-
   const isLoading = isExporting || isExportingJson || isExportingMarkdown;
   const loadingText = isExporting
     ? t("button.exporting")
@@ -96,7 +67,7 @@ const PdfExport = () => {
       ? t("button.exportingJson")
       : isExportingMarkdown
         ? t("button.exportingMarkdown")
-      : "";
+        : "";
 
   return (
     <>
@@ -125,14 +96,6 @@ const PdfExport = () => {
           <DropdownMenuItem onClick={handleExport} disabled={isLoading}>
             <Download className="w-4 h-4 mr-2" />
             {t("button.exportPdf")}
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={handlePrint} disabled={isLoading}>
-            <Printer className="w-4 h-4 mr-2" />
-            {t("button.print")}
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={handleJsonExport} disabled={isLoading}>
-            <FileJson className="w-4 h-4 mr-2" />
-            {t("button.exportJson")}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={handleMarkdownExport} disabled={isLoading}>
             <RiMarkdownLine className="w-4 h-4 mr-2" />

@@ -211,9 +211,9 @@ export default function Home() {
   }, [previewPanelCollapsed]);
 
   useEffect(() => {
-    document.body.classList.add("workbench-body-lock");
+    document.body?.classList.add("workbench-body-lock");
     return () => {
-      document.body.classList.remove("workbench-body-lock");
+      document.body?.classList.remove("workbench-body-lock");
     };
   }, []);
 

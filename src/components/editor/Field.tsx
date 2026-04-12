@@ -27,6 +27,7 @@ interface FieldProps {
   placeholder?: string;
   required?: boolean;
   className?: string;
+  "aria-label"?: string;
   showPresentSwitch?: boolean;
 }
 
@@ -38,6 +39,7 @@ const Field = ({
   placeholder,
   required,
   className,
+  "aria-label": ariaLabel,
   showPresentSwitch,
 }: FieldProps) => {
   const [yearInput, setYearInput] = useState("");
@@ -128,6 +130,7 @@ const Field = ({
           placeholder={placeholder}
           isRequired={required}
           className={className}
+          aria-label={ariaLabel}
         />
       </div>
     );
@@ -142,6 +145,7 @@ const Field = ({
           onChange={onChange}
           placeholder={placeholder}
           className={className}
+          aria-label={ariaLabel}
         />
       </div>
     );
@@ -160,6 +164,7 @@ const Field = ({
           rows={4}
           whileHover={{ scale: 1.005 }}
           whileTap={{ scale: 0.995 }}
+          aria-label={ariaLabel}
         />
       </label>
     );
@@ -206,6 +211,7 @@ const Field = ({
         required={required}
         whileHover={{ scale: 1.005 }}
         whileTap={{ scale: 0.995 }}
+        aria-label={ariaLabel}
       />
     </label>
   );

@@ -155,7 +155,7 @@ export const ResumeCardItem = ({
                                 damping: 17,
                             }}
                         >
-                            <AlertDialog>
+                            <AlertDialog >
                                 <AlertDialogTrigger asChild>
                                     <Button
                                         variant="outline"
@@ -168,7 +168,7 @@ export const ResumeCardItem = ({
                                         {t("common.delete")}
                                     </Button>
                                 </AlertDialogTrigger>
-                                <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+                                <AlertDialogContent className="!w-90%" onClick={(e) => e.stopPropagation()}>
                                     <AlertDialogHeader>
                                         <AlertDialogTitle>{t("dashboard.resumes.deleteConfirmTitle")}</AlertDialogTitle>
                                         <AlertDialogDescription>

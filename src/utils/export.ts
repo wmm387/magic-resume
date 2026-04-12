@@ -1,4 +1,6 @@
 import { toast } from "sonner";
+import html2canvas from "html2canvas";
+import html2pdf from "html2pdf.js";
 import { PDF_EXPORT_CONFIG } from "@/config";
 import { normalizeFontFamily } from "@/utils/fonts";
 import { ResumeData } from "@/types/resume";
@@ -95,6 +97,8 @@ export const optimizeImages = async (element: HTMLElement) => {
   console.log(`Image processing took ${performance.now() - startTime}ms`);
 };
 
+export type ExportMode = "local" | "server";
+
 export interface ExportToPdfOptions {
   elementId: string;
   title: string;
@@ -104,6 +108,7 @@ export interface ExportToPdfOptions {
   onEnd?: () => void;
   successMessage?: string;
   errorMessage?: string;
+  mode?: ExportMode;
 }
 
 interface ExportResumeFileOptions {
@@ -182,7 +187,8 @@ export const exportToPdf = async ({
   onStart,
   onEnd,
   successMessage,
-  errorMessage
+  errorMessage,
+  mode = "server"
 }: ExportToPdfOptions) => {
   const exportStartTime = performance.now();
   onStart?.();
@@ -195,68 +201,172 @@ export const exportToPdf = async ({
 
     const clonedElement = pdfElement.cloneNode(true) as HTMLElement;
     const selectedFontFamily = normalizeFontFamily(fontFamily);
-    const transformValue = clonedElement.style.transform || "";
-    const scaleMatch = transformValue.match(/scale\(([\d.]+)\)/);
-    
-    if (scaleMatch) {
-      const scale = Number(scaleMatch[1]);
-      if (Number.isFinite(scale) && scale > 0 && scale < 1) {
-        // 服务端导出前将 transform 缩放转为 zoom，避免分页计算偏差
-        clonedElement.style.removeProperty("transform");
-        clonedElement.style.removeProperty("transform-origin");
-        clonedElement.style.setProperty("width", "100%", "important");
-        clonedElement.style.setProperty("zoom", String(scale));
-      }
-    }
 
-    // 采用 PdfExport.tsx 中的逻辑，统一宽度和 padding 处理
+    // 移除 transform 缩放，确保导出尺寸正确
+    clonedElement.style.removeProperty("transform");
+    clonedElement.style.removeProperty("transform-origin");
     clonedElement.style.setProperty("width", "100%", "important");
+
+    // 设置基础样式
     clonedElement.style.setProperty("padding", "0", "important");
     clonedElement.style.setProperty("box-sizing", "border-box");
     clonedElement.style.setProperty("font-family", selectedFontFamily, "important");
+    clonedElement.style.setProperty("background", "white", "important");
+    clonedElement.style.setProperty("background-color", "white", "important");
 
+    // 隐藏分页线
     const pageBreakLines = clonedElement.querySelectorAll<HTMLElement>(".page-break-line");
     pageBreakLines.forEach((line) => {
       line.style.display = "none";
     });
 
-    const [capturedStyles] = await Promise.all([
-      getOptimizedStyles(),
-      optimizeImages(clonedElement)
-    ]);
+    // 优化图片
+    await optimizeImages(clonedElement);
 
-    // 注入 PdfExport.tsx 中的样式增强
-    const styles = `
-      ${capturedStyles}
-      html, body { background: white !important; background-color: white !important; }
-      html, body, #${elementId} {
-        background: white !important;
-        background-color: white !important;
-        font-family: ${selectedFontFamily} !important;
+    if (mode === "server") {
+      // 服务端导出
+      const [capturedStyles] = await Promise.all([
+        getOptimizedStyles()
+      ]);
+
+      const styles = `
+        ${capturedStyles}
+        html, body { background: white !important; background-color: white !important; }
+        html, body, #${elementId} {
+          background: white !important;
+          background-color: white !important;
+          font-family: ${selectedFontFamily} !important;
+        }
+      `;
+
+      const response = await fetch(PDF_EXPORT_CONFIG.SERVER_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          content: clonedElement.outerHTML,
+          styles,
+          margin: pagePadding
+        }),
+        mode: "cors",
+        signal: AbortSignal.timeout(PDF_EXPORT_CONFIG.TIMEOUT)
+      });
+
+      if (!response.ok) {
+        throw new Error(`PDF generation failed: ${response.status}`);
       }
-    `;
 
-    const response = await fetch(PDF_EXPORT_CONFIG.SERVER_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        content: clonedElement.outerHTML,
-        styles,
-        margin: pagePadding
-      }),
-      mode: "cors",
-      signal: AbortSignal.timeout(PDF_EXPORT_CONFIG.TIMEOUT)
-    });
+      const blob = await response.blob();
+      const fileName = `${getSafeFileName(title)}.pdf`;
+      downloadBlob(blob, fileName);
+    } else {
+      // 本地导出 - 移除之前设置的 padding:0，让元素使用自身样式
+      clonedElement.style.removeProperty("padding");
+      
+      // 获取原始元素的计算样式
+      const originalStyle = window.getComputedStyle(pdfElement);
+      
+      // 创建临时容器，设置 A4 纸张尺寸和 padding
+      const tempContainer = document.createElement("div");
+      tempContainer.style.cssText = `
+        position: fixed;
+        top: -9999px;
+        left: -9999px;
+        background: white;
+        padding: ${pagePadding}px;
+        box-sizing: border-box;
+        width: 210mm;
+        min-height: 297mm;
+        font-family: ${selectedFontFamily};
+        display: block;
+      `;
+      document.body.appendChild(tempContainer);
+      tempContainer.appendChild(clonedElement);
 
-    if (!response.ok) {
-      throw new Error(`PDF generation failed: ${response.status}`);
+      try {
+        // 等待元素渲染和图片加载完成
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        // 获取容器的实际尺寸
+        const containerRect = tempContainer.getBoundingClientRect();
+        const scrollHeight = tempContainer.scrollHeight;
+        
+        console.log(`Export container dimensions: ${containerRect.width}x${containerRect.height}, scrollHeight: ${scrollHeight}`);
+        
+        // 使用 html2canvas 捕获完整内容
+        const canvas = await html2canvas(tempContainer, {
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: "#ffffff",
+          logging: false,
+          scrollX: 0,
+          scrollY: 0,
+          windowWidth: containerRect.width,
+          windowHeight: Math.max(containerRect.height, scrollHeight),
+          x: 0,
+          y: 0,
+          useOverflowHidden: false,
+          removeContainer: false
+        });
+
+        console.log(`Canvas created: ${canvas.width}x${canvas.height}`);
+        
+        // 使用 jsPDF 直接创建 PDF（html2pdf 内部使用的库）
+        const jsPDF = (window as any).jspdf;
+        if (jsPDF) {
+          const pdf = new jsPDF.jsPDF({
+            orientation: "portrait",
+            unit: "mm",
+            format: "a4"
+          });
+          
+          const imgWidth = 210; // A4 width in mm
+          const imgHeight = (canvas.height * imgWidth) / canvas.width;
+          
+          // 如果内容高度超过 A4，需要分页
+          const pageHeight = 297; // A4 height in mm
+          let heightLeft = imgHeight;
+          let position = 0;
+          
+          while (heightLeft > 0) {
+            pdf.addImage(
+              canvas,
+              "JPEG",
+              0,
+              position,
+              imgWidth,
+              Math.min(heightLeft, pageHeight)
+            );
+            heightLeft -= pageHeight;
+            position -= pageHeight;
+            
+            if (heightLeft > 0) {
+              pdf.addPage();
+            }
+          }
+          
+          pdf.save(`${getSafeFileName(title)}.pdf`);
+        } else {
+          // 回退到 html2pdf
+          const opt = {
+            margin: 0,
+            filename: `${getSafeFileName(title)}.pdf`,
+            image: { type: "jpeg", quality: 0.95 },
+            jsPDF: {
+              unit: "mm",
+              format: "a4",
+              orientation: "portrait"
+            }
+          };
+          await html2pdf().set(opt).from(canvas).save();
+        }
+      } finally {
+        // 清理临时容器
+        document.body.removeChild(tempContainer);
+      }
     }
-
-    const blob = await response.blob();
-    const fileName = `${getSafeFileName(title)}.pdf`;
-    downloadBlob(blob, fileName);
 
     if (successMessage) toast.success(successMessage);
     console.log(`Total export took ${performance.now() - exportStartTime}ms`);

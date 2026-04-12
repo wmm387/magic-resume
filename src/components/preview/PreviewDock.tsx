@@ -7,8 +7,6 @@ import {
   Home,
   Copy,
   Download,
-  Printer,
-  FileJson,
   Loader2,
   Eye,
   FileText
@@ -18,10 +16,8 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { useTranslations } from "@/i18n/compat/client";
 import { useRouter } from "@/lib/navigation";
-import { exportResumeToBrowserPrint } from "@/utils/print";
-import { exportResumeAsJson, exportResumeAsMarkdown, exportToPdf } from "@/utils/export";
+import { exportResumeAsMarkdown, exportToPdf } from "@/utils/export";
 import { Dock, DockIcon } from "@/components/magicui/dock";
-import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
@@ -35,11 +31,8 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import TemplateSheet from "@/components/shared/TemplateSheet";
-import { GITHUB_REPO_URL, PDF_EXPORT_CONFIG } from "@/config";
 import { cn } from "@/lib/utils";
 import { useGrammarCheck } from "@/hooks/useGrammarCheck";
-import { useAIConfigStore } from "@/store/useAIConfigStore";
-import { AI_MODEL_CONFIGS } from "@/config/ai";
 import { useResumeStore } from "@/store/useResumeStore";
 import { useAIConfiguration } from "@/hooks/useAIConfiguration";
 import { FAQDialog } from "./FAQDialog";
@@ -71,7 +64,7 @@ const MagicThread = ({ height = 40 }: { height?: number }) => (
   <div className="relative flex flex-col items-center" style={{ height }}>
     {/* Base dashed line */}
     <div className="absolute inset-y-0 w-[1px] border-l border-dashed border-primary/30" />
-    
+
     {/* Traveling pulse */}
     <motion.div
       className="absolute top-0 w-[1px] h-4 bg-gradient-to-b from-transparent via-primary to-transparent"
@@ -105,17 +98,6 @@ const PreviewDock = ({
   const [isExportingJson, setIsExportingJson] = useState(false);
   const [isExportingMarkdown, setIsExportingMarkdown] = useState(false);
 
-  const {
-    selectedModel,
-    doubaoApiKey,
-    doubaoModelId,
-    deepseekApiKey,
-    deepseekModelId,
-    openaiApiKey,
-    openaiModelId,
-    openaiApiEndpoint
-  } = useAIConfigStore();
-
   const { duplicateResume, setActiveResume, activeResumeId, activeResume, updateGlobalSettings } = useResumeStore();
   const { globalSettings = {}, title } = activeResume || {};
 
@@ -129,17 +111,6 @@ const PreviewDock = ({
       onEnd: () => setIsExporting(false),
       successMessage: tPdf("toast.success"),
       errorMessage: tPdf("toast.error")
-    });
-  };
-
-  const handleExportJson = () => {
-    exportResumeAsJson({
-      resume: activeResume,
-      title,
-      onStart: () => setIsExportingJson(true),
-      onEnd: () => setIsExportingJson(false),
-      successMessage: tPdf("toast.jsonSuccess"),
-      errorMessage: tPdf("toast.jsonError")
     });
   };
 
@@ -163,20 +134,6 @@ const PreviewDock = ({
         }
       }
     });
-  };
-
-  const handlePrint = () => {
-    const resumeContent = document.getElementById("resume-preview");
-    if (!resumeContent) {
-      console.error("Resume content not found");
-      return;
-    }
-    const pagePadding = globalSettings?.pagePadding || 0;
-    exportResumeToBrowserPrint(
-      resumeContent,
-      pagePadding,
-      globalSettings?.fontFamily
-    );
   };
 
   const { checkConfiguration } = useAIConfiguration();
@@ -207,10 +164,6 @@ const PreviewDock = ({
       toast.error(t("grammarCheck.errorToast"));
     }
   }, [resumeContentRef, checkConfiguration, checkGrammar, t]);
-
-  const handleGoGitHub = () => {
-    window.open(GITHUB_REPO_URL, "_blank");
-  };
 
   const handleCopyResume = useCallback(() => {
     if (!activeResumeId) return;
@@ -256,7 +209,7 @@ const PreviewDock = ({
                   </TooltipContent>
                 </Tooltip>
               </DockIcon>
-              <DockIcon>
+              {/* <DockIcon>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <div
@@ -281,7 +234,7 @@ const PreviewDock = ({
                     </p>
                   </TooltipContent>
                 </Tooltip>
-              </DockIcon>
+              </DockIcon> */}
               <DockIcon>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -347,20 +300,6 @@ const PreviewDock = ({
                       {t("export.pdf")}
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={handlePrint}
-                      disabled={isLoading}
-                    >
-                      <Printer className="w-4 h-4 mr-2" />
-                      {t("export.print")}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={handleExportJson}
-                      disabled={isLoading}
-                    >
-                      <FileJson className="w-4 h-4 mr-2" />
-                      {t("export.json")}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
                       onClick={handleExportMarkdown}
                       disabled={isLoading}
                     >
@@ -394,7 +333,7 @@ const PreviewDock = ({
                   <TooltipTrigger asChild>
                     <button
                       onClick={toggleSidePanel}
-                       className={cn(
+                      className={cn(
                         "flex h-[30px] w-[30px] items-center justify-center rounded-sm transition-all",
                         "hover:bg-gray-100/50 dark:hover:bg-neutral-800/50",
                         "active:scale-95",
@@ -471,7 +410,7 @@ const PreviewDock = ({
                 </Tooltip>
               </DockIcon>
               <div className="w-full h-[1px] bg-gray-200" />
- 
+
               <DockIcon>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -490,31 +429,12 @@ const PreviewDock = ({
                   </TooltipContent>
                 </Tooltip>
               </DockIcon>
-              <DockIcon>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      onClick={handleGoGitHub}
-                      className={cn(
-                        "flex h-[20px] w-[20px] items-center justify-center rounded-lg transition-all",
-                        "hover:bg-gray-100/50 dark:hover:bg-neutral-800/50",
-                        "active:scale-95"
-                      )}
-                    >
-                      <Icons.gitHub />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="left" sideOffset={10}>
-                    <p>{t("github")}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </DockIcon>
             </div>
           </Dock>
         </TooltipProvider>
 
         <MagicThread height={60} />
-        
+
         <div className="w-[56px] flex justify-center">
           <FAQDialog />
         </div>

@@ -5,11 +5,12 @@ import { getLocale, getMessages, getTranslations } from "@/i18n/compat/server";
 import Document from "@/components/Document";
 import { Providers } from "@/app/providers";
 import { Toaster } from "@/components/ui/sonner";
+import { Locale } from "@/i18n/config";
 
 type Props = {
   children: ReactNode;
   params: {
-    locale: string;
+    locale: Locale;
   };
 };
 
