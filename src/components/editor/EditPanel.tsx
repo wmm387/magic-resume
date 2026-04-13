@@ -27,7 +27,6 @@ export function EditPanel() {
     switch (activeSection) {
       case "basic":
         return <BasicPanel />;
-
       case "projects":
         return <ProjectPanel />;
       case "education":

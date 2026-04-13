@@ -316,7 +316,6 @@ const PhotoConfigDrawer: React.FC<Props> = ({
   };
   return (
     <Drawer
-      direction={isMobile ? "bottom" : "left"}
       modal={false}
       open={isOpen}
       dismissible={false}
