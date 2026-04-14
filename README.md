@@ -8,30 +8,28 @@
 
 <a href="https://trendshift.io/repositories/13077" target="_blank"><img src="https://trendshift.io/api/badge/repositories/13077" alt="Magic Resume | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
 
-[简体中文](./README.zh-CN.md) | English
+简体中文 | [English](./README.md)
 
 </div>
 
-Magic Resume is a modern online resume editor that makes creating professional resumes simple and enjoyable. Built with TanStack Start and Framer Motion, it supports real-time preview and custom themes.
+Magic Resume 是一个现代化的在线简历编辑器，让创建专业简历变得简单有趣。基于 TanStack Start 和 Motion 构建，支持实时预览和自定义主题。
 
-## 📸 Screenshots
+## 📸 项目截图
 
-<img width="1920" height="1440" alt="336_1x_shots_so" src="https://github.com/user-attachments/assets/18969a17-06f8-4a4b-94eb-284ba8442620" />
+<img width="1920" height="1440" alt="85_1x_shots_so" src="https://github.com/user-attachments/assets/4667e49a-7bf2-4379-9390-725e42799dc7" />
 
+## ✨ 特性
 
-## ✨ Features
+- 🚀 基于 TanStack Start 构建
+- 💫 流畅的动画效果 (Motion)
+- 🎨 自定义主题支持
+- 🌙 深色模式
+- 📤 导出为 PDF
+- 🔄 实时预览
+- 💾 自动保存
+- 🔒 硬盘级存储
 
-- 🚀 Built with TanStack Start
-- 💫 Smooth animations (Framer Motion)
-- 🎨 Custom theme support
-- 📱 Responsive design
-- 🌙 Dark mode
-- 📤 Export to PDF
-- 🔄 Real-time preview
-- 💾 Auto-save
-- 🔒 Local storage
-
-## 🛠️ Tech Stack
+## 🛠️ 技术栈
 
 - TanStack Start
 - TypeScript
@@ -42,73 +40,71 @@ Magic Resume is a modern online resume editor that makes creating professional r
 - Shadcn/ui
 - Lucide Icons
 
-## 🚀 Quick Start
+## 🚀 快速开始
 
-1. Clone the project
+1. 克隆项目
 
 ```bash
 git clone git@github.com:JOYCEQL/magic-resume.git
 cd magic-resume
 ```
 
-2. Install dependencies
+2. 安装依赖
 
 ```bash
 pnpm install
 ```
 
-3. Start development server
+3. 启动开发服务器
 
 ```bash
 pnpm dev
 ```
 
-4. Open browser and visit `http://localhost:3000`
+4. 打开浏览器访问 `http://localhost:3000`
 
-## 📦 Build and Deploy
+## 📦 构建打包
 
 ```bash
 pnpm build
 ```
 
-
-## 🐳 Docker Deployment
+## 🐳 Docker 部署
 
 ### Docker Compose
 
-1. Ensure you have Docker and Docker Compose installed
+1. 确保你已经安装了 Docker 和 Docker Compose
 
-2. Run the following command in the project root directory:
+2. 在项目根目录运行：
 
 ```bash
 docker compose up -d
 ```
 
-This will:
+这将会：
 
-- Automatically build the application image
-- Start the container in the background
+- 自动构建应用镜像
+- 在后台启动容器
 
+## 📝 开源协议与商业授权
 
-## 📝 License and Commercial Use
+本项目源代码基于 **Apache 2.0** 协议开源，但附带**严格的商业使用限制**：
 
-The source code of this project is open-sourced under the **Apache 2.0** license, but with **strict commercial use restrictions**:
+- **个人免费**：仅限个人非商业目的（如个人学习交流、制作个人简历）免费使用。
+- **商用需授权**：严禁未经授权的商业化使用。任何组织或个人，若将其作为服务（SaaS/PaaS等）向公众提供以获取利益，或作为企业商业运营使用，或进行二次商业化开发，**无论是否修改源代码，均须获取商业授权**。
 
-- **Free for Personal Use**: Free to use purely for personal, non-commercial purposes (e.g., personal learning, creating your own resume).
-- **Commercial License Required**: Unauthorized commercial use is strictly prohibited. Any organization or individual that provides it as a service (SaaS/PaaS, etc.) to the public for profit, uses it for enterprise commercial operations, or conducts secondary commercial development, **must obtain a commercial license, regardless of whether the source code has been modified**.
+详情请查看 [LICENSE](LICENSE) 文件。
 
-Please see the [LICENSE](LICENSE) file for detailed terms.
+## 🗺️ 路线图
 
-## 🗺️ Roadmap
-
-- [x] AI-assisted writing
-- [x] Multi-language support
-- [ ] Support for more resume templates
-- [ ] Support for more export formats
-- [ ] Import PDF, Markdown, etc.
-- [x] Custom model
-- [x] Auto one page
-- [ ] Online resume hosting
+- [x] AI 辅助编写
+- [x] 多语言支持
+- [ ] 支持更多简历模板
+- [ ] 更多格式导出
+- [x] 自定义模型
+- [x] 自动一页纸
+- [ ] 导入 PDF, Markdown 等
+- [ ] 在线简历托管
 
 ## 📈 Star History
 
@@ -120,29 +116,29 @@ Please see the [LICENSE](LICENSE) file for detailed terms.
  </picture>
 </a>
 
-## 📞 Contact
+## 📞 联系方式
 
-You can follow the latest updates via:
+可以通过以下方式关注最新动态:
 
-- Author: Siyue
+- 作者：SiYue
 - X: @GuangzhouY81070
-- Discord: Join our community https://discord.gg/9mWgZrW3VN
-- Email: 18806723365@163.com
-- WeChat Group: Scan to join our developer community
+- Discord: 欢迎加入群组 https://discord.gg/9mWgZrW3VN
+- 邮箱：18806723365@163.com
+- 微信群：扫码加入开发交流群
 
-  <img src="./images/wechat.jpg" width="200" alt="WeChat Group">
+<img src="./images/wechat.jpg" width="200" alt="WeChat Group">
 
-- Project Homepage: https://github.com/JOYCEQL/magic-resume
+- 项目主页：https://github.com/JOYCEQL/magic-resume
 
-## 🌟 Support
+## 🌟 支持项目
 
-If you find this project helpful, please give it a star ⭐️
+<img src="https://github.com/JOYCEQL/picx-images-hosting/raw/master/pintu-fulicat.com-1741081632544.26lmg2uc2m.webp" width="320"  alt="图片描述">
 
-## ❤️ Sponsors
+## ❤️ 赞助名单
 
 <div align="center">
   <h3>Sponsors</h3>
-  <p>If you sponsored this project but are not listed here, please contact me.</p>
+  <p>如果您赞助了本项目，但没展示在这里，请联系我。</p>
   <p>
     <a href="https://github.com/yj147">
       <img src="https://github.com/yj147.png?size=40" width="40" height="40" alt="@yj147" />
@@ -150,7 +146,7 @@ If you find this project helpful, please give it a star ⭐️
     <a href="https://github.com/someone1128">
       <img src="https://github.com/someone1128.png?size=40" width="40" height="40" alt="@someone1128" />
     </a>
-    <!-- Add more sponsors here:
+    <!-- 在这里继续添加赞助者：
     <a href="https://github.com/<username>">
       <img src="https://github.com/<username>.png?size=40" width="40" height="40" alt="@<username>" />
     </a>
