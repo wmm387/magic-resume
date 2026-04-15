@@ -1,6 +1,6 @@
 import ReactDOM from 'react-dom/client'
-import '@/app/globals.css'
-import '@/app/font.css'
+import '@/styles/globals.css'
+import '@/styles/font.css'
 import { RouterProvider } from '@tanstack/react-router'
 import { getRouter } from './router'
 
