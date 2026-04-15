@@ -1,12 +1,12 @@
-import React from "react";
-import { motion } from "framer-motion";
-import { toast } from "sonner";
+import React from 'react'
+import { motion } from 'framer-motion'
+import { toast } from 'sonner'
 import {
     Card,
     CardContent,
     CardFooter,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+} from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import {
     AlertDialog,
     AlertDialogAction,
@@ -17,11 +17,11 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
     AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import ResumeTemplateComponent from "@/components/templates";
-import { DEFAULT_TEMPLATES } from "@/config";
-import { cn } from "@/lib/utils";
-import { normalizeFontFamily } from "@/utils/fonts";
+} from '@/components/ui/alert-dialog'
+import ResumeTemplateComponent from '@/components/templates'
+import { DEFAULT_TEMPLATES } from '@/config'
+import { cn } from '@/lib/utils'
+import { normalizeFontFamily } from '@/utils/fonts'
 
 interface ResumeCardItemProps {
     id: string;
@@ -44,25 +44,25 @@ export const ResumeCardItem = ({
     deleteResume,
     index,
 }: ResumeCardItemProps) => {
-    const containerRef = React.useRef<HTMLDivElement>(null);
-    const [scale, setScale] = React.useState(0.24);
+    const containerRef = React.useRef<HTMLDivElement>(null)
+    const [scale, setScale] = React.useState(0.24)
     const activeTemplate =
         DEFAULT_TEMPLATES.find((template) => template.id === resume.templateId) ??
-        DEFAULT_TEMPLATES[0];
+        DEFAULT_TEMPLATES[0]
     const templateNameKey =
-        activeTemplate.id === "left-right" ? "leftRight" : activeTemplate.id;
+        activeTemplate.id === 'left-right' ? 'leftRight' : activeTemplate.id
 
     React.useEffect(() => {
-        if (!containerRef.current) return;
+        if (!containerRef.current) return
         const observer = new ResizeObserver((entries) => {
-            const { width } = entries[0].contentRect;
+            const { width } = entries[0].contentRect
             if (width > 0) {
-                setScale(width / 793.700787); // Exact 210mm in pixels at 96dpi
+                setScale(width / 793.700787) // Exact 210mm in pixels at 96dpi
             }
-        });
-        observer.observe(containerRef.current);
-        return () => observer.disconnect();
-    }, []);
+        })
+        observer.observe(containerRef.current)
+        return () => observer.disconnect()
+    }, [])
 
     return (
         <motion.div
@@ -78,9 +78,9 @@ export const ResumeCardItem = ({
         >
             <Card
                 className={cn(
-                    "group border transition-all duration-200 aspect-[210/297] flex flex-col overflow-hidden",
-                    "hover:border-primary/40 hover:shadow-lg",
-                    "dark:hover:border-primary/40"
+                    'group border transition-all duration-200 aspect-[210/297] flex flex-col overflow-hidden',
+                    'hover:border-primary/40 hover:shadow-lg',
+                    'dark:hover:border-primary/40'
                 )}
             >
                 <CardContent className="p-0 flex-1 relative bg-gray-50 dark:bg-gray-900 overflow-hidden cursor-pointer">
@@ -89,15 +89,15 @@ export const ResumeCardItem = ({
                             <div
                                 className="absolute top-0 left-0 bg-white"
                                 style={{
-                                    width: "210mm",
-                                    height: "297mm",
+                                    width: '210mm',
+                                    height: '297mm',
                                     transform: `scale(${scale})`,
-                                    transformOrigin: "top left",
+                                    transformOrigin: 'top left',
                                     padding: `${resume.globalSettings?.pagePadding || 32}px`,
                                     fontFamily: normalizeFontFamily(resume.globalSettings?.fontFamily),
                                 }}
                             >
-                                <ResumeTemplateComponent data={resume as any} template={activeTemplate} />
+                                <ResumeTemplateComponent data={resume} template={activeTemplate} />
                             </div>
                         </div>
                     </div>
@@ -106,7 +106,7 @@ export const ResumeCardItem = ({
                     <div className="absolute inset-x-0 bottom-0 pt-12 pb-3 px-4 flex justify-between items-end border-t border-transparent z-10 transition-colors group-hover:bg-white/50 dark:group-hover:bg-gray-950/50">
                         <div className="flex flex-col w-full">
                             <span className="text-[15px] font-semibold truncate text-gray-900 dark:text-gray-100 drop-shadow-sm w-[90%]">
-                                {resume.title || t("dashboard.resumes.untitled")}
+                                {resume.title || t('dashboard.resumes.untitled')}
                             </span>
                             <span className="text-[11px] text-gray-600 dark:text-gray-300 mt-0.5 font-medium">
                                 {t(`dashboard.templates.${templateNameKey}.name`)} · {new Intl.DateTimeFormat(locale, {
@@ -127,7 +127,7 @@ export const ResumeCardItem = ({
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             transition={{
-                                type: "spring",
+                                type: 'spring',
                                 stiffness: 400,
                                 damping: 17,
                             }}
@@ -137,12 +137,12 @@ export const ResumeCardItem = ({
                                 className="w-full text-sm hover:bg-gray-100 dark:border-primary/50 dark:hover:bg-primary/10"
                                 size="sm"
                                 onClick={(e) => {
-                                    e.stopPropagation();
-                                    setActiveResume(id);
-                                    router.push(`/app/workbench/${id}`);
+                                    e.stopPropagation()
+                                    setActiveResume(id)
+                                    router.push(`/resume/${id}`)
                                 }}
                             >
-                                {t("common.edit")}
+                                {t('common.edit')}
                             </Button>
                         </motion.div>
 
@@ -150,7 +150,7 @@ export const ResumeCardItem = ({
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             transition={{
-                                type: "spring",
+                                type: 'spring',
                                 stiffness: 400,
                                 damping: 17,
                             }}
@@ -162,30 +162,30 @@ export const ResumeCardItem = ({
                                         className="w-full text-sm text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-500 dark:hover:bg-red-950/50 dark:hover:text-red-400"
                                         size="sm"
                                         onClick={(e) => {
-                                            e.stopPropagation();
+                                            e.stopPropagation()
                                         }}
                                     >
-                                        {t("common.delete")}
+                                        {t('common.delete')}
                                     </Button>
                                 </AlertDialogTrigger>
                                 <AlertDialogContent className="!w-90%" onClick={(e) => e.stopPropagation()}>
                                     <AlertDialogHeader>
-                                        <AlertDialogTitle>{t("dashboard.resumes.deleteConfirmTitle")}</AlertDialogTitle>
+                                        <AlertDialogTitle>{t('dashboard.resumes.deleteConfirmTitle')}</AlertDialogTitle>
                                         <AlertDialogDescription>
-                                            {t("dashboard.resumes.deleteConfirmDescription")}
+                                            {t('dashboard.resumes.deleteConfirmDescription')}
                                         </AlertDialogDescription>
                                     </AlertDialogHeader>
                                     <AlertDialogFooter>
-                                        <AlertDialogCancel onClick={(e) => e.stopPropagation()}>{t("common.cancel")}</AlertDialogCancel>
+                                        <AlertDialogCancel onClick={(e) => e.stopPropagation()}>{t('common.cancel')}</AlertDialogCancel>
                                         <AlertDialogAction
                                             className="bg-red-600 hover:bg-red-700 text-white focus:ring-red-600 border-none"
                                             onClick={(e) => {
-                                                e.stopPropagation();
-                                                deleteResume(resume);
-                                                toast.success(t("common.deleteSuccess"));
+                                                e.stopPropagation()
+                                                deleteResume(resume)
+                                                toast.success(t('common.deleteSuccess'))
                                             }}
                                         >
-                                            {t("common.confirm")}
+                                            {t('common.confirm')}
                                         </AlertDialogAction>
                                     </AlertDialogFooter>
                                 </AlertDialogContent>
@@ -195,5 +195,5 @@ export const ResumeCardItem = ({
                 </CardFooter>
             </Card>
         </motion.div>
-    );
-};
+    )
+}

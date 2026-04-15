@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import viteReact from '@vitejs/plugin-react'
 import tsconfigPaths from 'vite-tsconfig-paths'
+import { tanstackRouter } from '@tanstack/router-plugin/vite'
 
 export default defineConfig({
   server: {
@@ -9,8 +10,12 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['pdfjs-dist', 'undici'],
   },
-  define: {
-    'process.env': {},
-  },
-  plugins: [tsconfigPaths(), viteReact()],
+  plugins: [
+    tsconfigPaths(),
+    tanstackRouter({
+      target: 'react',
+      autoCodeSplitting: true,
+    }),
+    viteReact(),
+  ],
 })

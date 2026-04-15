@@ -1,19 +1,15 @@
-import React, { useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useLocale, useTranslations } from "@/i18n/compat/client";
-import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { DEFAULT_TEMPLATES } from "@/config";
-import { initialResumeState } from "@/config/initialResumeData";
-import ResumeTemplateComponent from "@/components/templates";
-import { useTemplateSnapshots } from "@/hooks/useTemplateSnapshots";
-import type { Translator } from "@/i18n/compat/utils";
-import type { ResumeData } from "@/types/resume";
-import type { ResumeTemplate } from "@/types/template";
-import { ChevronLeft, FilePlus, Sparkles, X } from "lucide-react";
-import { normalizeFontFamily } from "@/utils/fonts";
-import { VisuallyHidden } from "@heroui/react";
+import { useEffect, useState } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { ChevronLeft, FilePlus, Sparkles, X } from 'lucide-react'
+import { VisuallyHidden } from '@heroui/react'
+import type { Translator } from '@/i18n/compat/utils'
+import type { ResumeTemplate } from '@/types/template'
+import { useLocale, useTranslations } from '@/i18n/compat/client'
+import { Drawer, DrawerContent, DrawerTitle } from '@/components/ui/drawer'
+import { Button } from '@/components/ui/button'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { DEFAULT_TEMPLATES } from '@/config'
+import { useTemplateSnapshots } from '@/hooks/useTemplateSnapshots'
 
 interface CreateResumeDrawerProps {
   open: boolean;
@@ -21,27 +17,24 @@ interface CreateResumeDrawerProps {
   onCreate: (templateId: string | null) => void;
 }
 
-const A4_WIDTH_PX = 793.700787;
-const A4_HEIGHT_PX = 1122.519685;
-
 type BlankTemplate = {
   id: null;
   isBlank: true;
-  nameKey: "blankTitle";
+  nameKey: 'blankTitle';
 };
 
 type NormalTemplate = ResumeTemplate & { isBlank: false; nameKey: string };
 type TemplateOption = NormalTemplate | BlankTemplate;
 
 const toTemplateNameKey = (templateId: string) =>
-  templateId === "left-right" ? "leftRight" : templateId;
+  templateId === 'left-right' ? 'leftRight' : templateId
 
-const BLANK_TEMPLATE: BlankTemplate = { id: null, isBlank: true, nameKey: "blankTitle" };
+const BLANK_TEMPLATE: BlankTemplate = { id: null, isBlank: true, nameKey: 'blankTitle' }
 const NORMAL_TEMPLATES: NormalTemplate[] = DEFAULT_TEMPLATES.map((template) => ({
   ...template,
   isBlank: false,
   nameKey: toTemplateNameKey(template.id),
-}));
+}))
 
 const BlankTemplateThumbnail = ({ t }: { t: Translator }) => (
   <div className="w-full h-full flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-800/50">
@@ -49,13 +42,13 @@ const BlankTemplateThumbnail = ({ t }: { t: Translator }) => (
       <FilePlus className="w-12 h-12" />
     </div>
     <span className="text-2xl font-bold text-gray-700 dark:text-gray-200 group-hover:text-primary transition-colors">
-      {t("dashboard.resumes.createDialog.blankTitle")}
+      {t('dashboard.resumes.createDialog.blankTitle')}
     </span>
     <p className="text-gray-500 mt-4 text-base px-8 text-center leading-relaxed">
-      {t("dashboard.resumes.createDialog.blankThumbnailDescription")}
+      {t('dashboard.resumes.createDialog.blankThumbnailDescription')}
     </p>
   </div>
-);
+)
 
 const TemplateCardThumbnail = ({
   template,
@@ -67,7 +60,7 @@ const TemplateCardThumbnail = ({
   snapshotSrc?: string | null,
 }) => {
   if (template.isBlank) {
-    return <BlankTemplateThumbnail t={t} />;
+    return <BlankTemplateThumbnail t={t} />
   }
 
   if (snapshotSrc) {
@@ -79,7 +72,7 @@ const TemplateCardThumbnail = ({
         loading="eager"
         draggable={false}
       />
-    );
+    )
   }
 
   return (
@@ -88,121 +81,31 @@ const TemplateCardThumbnail = ({
         {t(`dashboard.templates.${template.nameKey}.name`)}
       </span>
     </div>
-  );
-};
-
-const TemplateThumbnail = ({
-  template,
-  t,
-  scaleModifier = 1,
-  quality = "low" // low for grid, high for preview
-}: {
-  template: TemplateOption,
-  t: Translator,
-  scaleModifier?: number,
-  quality?: "low" | "high"
-}) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(0.2);
-
-  useEffect(() => {
-    if (!containerRef.current || template.isBlank) return;
-    const observer = new ResizeObserver((entries) => {
-      const { width } = entries[0].contentRect;
-      if (width > 0) {
-        setScale((width / A4_WIDTH_PX) * scaleModifier); // Exact 210mm in pixels at 96dpi
-      }
-    });
-    observer.observe(containerRef.current);
-    return () => observer.disconnect();
-  }, [template.isBlank, scaleModifier]);
-
-  if (template.isBlank) {
-    return <BlankTemplateThumbnail t={t} />;
-  }
-
-  const sampleExperience = quality === "high"
-    ? [
-      {
-        id: "1",
-        company: t("dashboard.resumes.createDialog.sample.company"),
-        position: t("dashboard.resumes.createDialog.sample.position"),
-        date: `2020-01 - ${t("dashboard.resumes.createDialog.sample.present")}`,
-        details: t("dashboard.resumes.createDialog.sample.workDescription"),
-        visible: true,
-      },
-    ]
-    : [];
-
-  const previewData: ResumeData = {
-    ...initialResumeState,
-    id: "preview-mock",
-    templateId: template.id,
-    createdAt: new Date(0).toISOString(),
-    updatedAt: new Date(0).toISOString(),
-    globalSettings: {
-      ...initialResumeState.globalSettings,
-      themeColor: template.colorScheme?.primary || "#000",
-      sectionSpacing: template.spacing?.sectionGap || 16,
-      paragraphSpacing: template.spacing?.itemGap || 8,
-      pagePadding: template.spacing?.contentPadding || 32,
-    },
-    basic: {
-      ...initialResumeState.basic,
-      layout: (template.basic?.layout as any) || "left",
-    },
-    // Feed richer mock content in large preview.
-    experience: sampleExperience,
-  };
-
-  return (
-    <div className="w-full h-full overflow-hidden" ref={containerRef}>
-      <div
-        className="w-full h-full flex items-center justify-center"
-      >
-        <div
-          className="bg-white pointer-events-none"
-          style={{
-            width: "210mm",
-            height: "297mm",
-            transform: `scale(${scale})`,
-            transformOrigin: "center center",
-            padding: `${template.spacing?.contentPadding || 32}px`,
-            fontFamily: normalizeFontFamily(previewData.globalSettings?.fontFamily),
-          }}
-        >
-          <ResumeTemplateComponent
-            data={previewData}
-            template={template as ResumeTemplate}
-          />
-        </div>
-      </div>
-    </div>
-  );
-};
+  )
+}
 
 export const CreateResumeDrawer = ({
   open,
   onOpenChange,
   onCreate,
 }: CreateResumeDrawerProps) => {
-  const t = useTranslations();
-  const locale = useLocale();
-  const { snapshotMap } = useTemplateSnapshots(locale);
-  const [previewTarget, setPreviewTarget] = useState<TemplateOption | null>(null);
+  const t = useTranslations()
+  const locale = useLocale()
+  const { snapshotMap } = useTemplateSnapshots(locale)
+  const [previewTarget, setPreviewTarget] = useState<TemplateOption | null>(null)
 
   const handleCreate = (template: TemplateOption) => {
-    onCreate(template.id);
-    setPreviewTarget(null);
-  };
+    onCreate(template.id)
+    setPreviewTarget(null)
+  }
 
   // Close preview when drawer closes
   useEffect(() => {
     if (!open) {
-      const timeoutId = window.setTimeout(() => setPreviewTarget(null), 300);
-      return () => window.clearTimeout(timeoutId);
+      const timeoutId = window.setTimeout(() => setPreviewTarget(null), 300)
+      return () => window.clearTimeout(timeoutId)
     }
-  }, [open]);
+  }, [open])
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
@@ -215,12 +118,12 @@ export const CreateResumeDrawer = ({
           {/* HEADER BAR */}
           <div className="flex-none px-6 py-4 flex items-center justify-between z-10">
             <div className="text-2xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-500 dark:from-white dark:to-gray-400 flex items-center">
-              {t("dashboard.resumes.createDialog.title")}
+              {t('dashboard.resumes.createDialog.title')}
             </div>
             <button
               type="button"
               onClick={() => onOpenChange(false)}
-              aria-label={t("common.cancel")}
+              aria-label={t('common.cancel')}
               className="p-2 -mr-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             >
               <X className="w-5 h-5 text-gray-400" />
@@ -234,12 +137,12 @@ export const CreateResumeDrawer = ({
                 <section>
                   <div className="flex items-center mb-4">
                     <h4 className="text-lg font-bold text-gray-900 dark:text-white">
-                      {t("dashboard.resumes.createDialog.startFromBlank")}
+                      {t('dashboard.resumes.createDialog.startFromBlank')}
                     </h4>
                     <div className="h-px bg-gray-200 dark:bg-gray-800 flex-1 ml-4" />
                   </div>
                   <motion.div
-                    layoutId={`card-container-blank`}
+                    layoutId={'card-container-blank'}
                     whileHover={{ y: -2, scale: 1.005 }}
                     whileTap={{ scale: 0.99 }}
                     onClick={() => handleCreate(BLANK_TEMPLATE)}
@@ -247,25 +150,25 @@ export const CreateResumeDrawer = ({
                   >
                     {/* Small visual icon area */}
                     <motion.div
-                      layoutId={`card-image-blank`}
+                      layoutId={'card-image-blank'}
                       className="h-20 w-20 flex-shrink-0 rounded-xl bg-white dark:bg-gray-800 shadow-inner flex items-center justify-center border border-gray-100 dark:border-gray-700"
                     >
                       <FilePlus className="w-8 h-8 text-gray-400 group-hover:text-primary transition-colors" />
                     </motion.div>
 
                     <div className="flex-1 text-center">
-                      <motion.div layoutId={`card-title-blank`} className="inline-block">
+                      <motion.div layoutId={'card-title-blank'} className="inline-block">
                         <h5 className="text-lg font-bold text-gray-900 dark:text-white mb-1 group-hover:text-primary transition-colors">
-                          {t("dashboard.resumes.createDialog.blankTitle")}
+                          {t('dashboard.resumes.createDialog.blankTitle')}
                         </h5>
                       </motion.div>
                       <p className="text-gray-500 dark:text-gray-400 text-sm max-w-sm leading-relaxed">
-                        {t("dashboard.resumes.createDialog.blankCardDescription")}
+                        {t('dashboard.resumes.createDialog.blankCardDescription')}
                       </p>
                     </div>
 
                     <div className="flex text-primary font-medium items-center text-sm group-hover:translate-x-0 duration-300">
-                      {t("dashboard.resumes.createDialog.createNow")} <ChevronLeft className="w-4 h-4 ml-1 rotate-180" />
+                      {t('dashboard.resumes.createDialog.createNow')} <ChevronLeft className="w-4 h-4 ml-1 rotate-180" />
                     </div>
                   </motion.div>
                 </section>
@@ -274,13 +177,13 @@ export const CreateResumeDrawer = ({
                 <section>
                   <div className="flex items-center mb-4">
                     <h4 className="text-lg font-bold text-gray-900 dark:text-white">
-                      {t("dashboard.resumes.createDialog.startFromTemplate")}
+                      {t('dashboard.resumes.createDialog.startFromTemplate')}
                     </h4>
                     <div className="h-px bg-gray-200 dark:bg-gray-800 flex-1 ml-4" />
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6 hover:!shadow-none">
                     {NORMAL_TEMPLATES.map((template) => {
-                      const templateName = t(`dashboard.templates.${template.nameKey}.name`);
+                      const templateName = t(`dashboard.templates.${template.nameKey}.name`)
 
                       return (
                         <motion.div
@@ -330,7 +233,7 @@ export const CreateResumeDrawer = ({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
                 className="fixed inset-0 z-50 bg-white dark:bg-gray-950 flex flex-col overflow-hidden rounded-t-[2rem]"
               >
                 {/* Top: Header with Back Button */}
@@ -339,13 +242,13 @@ export const CreateResumeDrawer = ({
                     type="button"
                     onClick={() => setPreviewTarget(null)}
                     className="rounded-full p-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                    aria-label={t("dashboard.resumes.createDialog.backToGrid")}
+                    aria-label={t('dashboard.resumes.createDialog.backToGrid')}
                   >
                     <ChevronLeft className="w-5 h-5 text-gray-500 hover:text-primary dark:text-gray-400" />
                   </button>
                   <span className="text-lg font-semibold text-gray-900 dark:text-white">
                     {previewTarget.isBlank
-                      ? t("dashboard.resumes.createDialog.blankTitle")
+                      ? t('dashboard.resumes.createDialog.blankTitle')
                       : t(`dashboard.templates.${previewTarget.nameKey}.name`)}
                   </span>
                   <div className="w-10" />
@@ -363,15 +266,14 @@ export const CreateResumeDrawer = ({
                         layoutId={`card-image-${previewTarget.id || 'blank'}`}
                         className="aspect-[210/297] rounded-xl overflow-hidden shadow-2xl shadow-black/10 dark:shadow-black/40 ring-1 ring-black/5 dark:ring-white/10 bg-white"
                         style={{
-                          maxHeight: "100%",
-                          maxWidth: "100%",
+                          maxHeight: '100%',
+                          maxWidth: '100%',
                         }}
                       >
-                        {/* <TemplateThumbnail template={previewTarget} t={t} quality="high" scaleModifier={0.6} /> */}
                         <TemplateCardThumbnail
                           template={previewTarget}
                           t={t}
-                          snapshotSrc={snapshotMap[previewTarget?.id || 'blank']}
+                          snapshotSrc={snapshotMap[previewTarget.id || 'blank']}
                         />
                       </motion.div>
                     </motion.div>
@@ -385,7 +287,7 @@ export const CreateResumeDrawer = ({
                     >
                       <h3 className="text-2xl font-black tracking-tight text-gray-900 dark:text-white mb-2">
                         {previewTarget.isBlank
-                          ? t("dashboard.resumes.createDialog.blankTitle")
+                          ? t('dashboard.resumes.createDialog.blankTitle')
                           : t(`dashboard.templates.${previewTarget.nameKey}.name`)}
                       </h3>
                     </motion.div>
@@ -394,7 +296,7 @@ export const CreateResumeDrawer = ({
 
                     <p className="text-gray-600 dark:text-gray-400 text-base leading-relaxed mb-6 font-medium">
                       {previewTarget.isBlank
-                        ? t("dashboard.resumes.createDialog.blankPreviewDescription")
+                        ? t('dashboard.resumes.createDialog.blankPreviewDescription')
                         : t(`dashboard.templates.${previewTarget.nameKey}.description`)}
                     </p>
 
@@ -404,7 +306,7 @@ export const CreateResumeDrawer = ({
                         className="w-full h-12 text-base font-bold rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:scale-[1.02] active:scale-[0.98]"
                         onClick={() => handleCreate(previewTarget)}
                       >
-                        {t("dashboard.resumes.createDialog.useThisTemplate")}
+                        {t('dashboard.resumes.createDialog.useThisTemplate')}
                         <Sparkles className="w-5 h-5 ml-2 opacity-70" />
                       </Button>
                     </div>
@@ -416,5 +318,5 @@ export const CreateResumeDrawer = ({
         </div>
       </DrawerContent>
     </Drawer>
-  );
-};
+  )
+}

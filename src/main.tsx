@@ -1,10 +1,15 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './app/globals.css';
-import App from './App';
+import ReactDOM from 'react-dom/client'
+import '@/app/globals.css'
+import '@/app/font.css'
+import { RouterProvider } from '@tanstack/react-router'
+import { getRouter } from './router'
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+const router = getRouter()
+
+const rootElement = document.getElementById('app')!
+
+if (!rootElement.innerHTML) {
+  const root = ReactDOM.createRoot(rootElement)
+  root.render(<RouterProvider router={router} />)
+}
+
