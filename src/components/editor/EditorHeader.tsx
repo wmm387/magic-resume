@@ -1,96 +1,45 @@
-import { useEffect, useState } from "react";
-import { useTranslations } from "@/i18n/compat/client";
-import { AlertCircle, ArrowLeft } from "lucide-react";
-import { motion } from "framer-motion";
-import { useRouter } from "@/lib/navigation";
-import { Input } from "@/components/ui/input";
-import PdfExport from "../shared/PdfExport";
-import { useResumeStore } from "@/store/useResumeStore";
-import { useGrammarCheck } from "@/hooks/useGrammarCheck";
-import { GrammarCheckDrawer } from "./grammar/GrammarCheckDrawer";
-import { getFileHandle, getConfig } from "@/utils/fileSystem";
+import { ArrowLeft } from 'lucide-react'
+import { motion } from 'framer-motion'
+import PdfExport from '../shared/PdfExport'
+import { useRouter } from '@/lib/navigation'
+import { Input } from '@/components/ui/input'
+import { useResumeStore } from '@/store/useResumeStore'
 
 interface EditorHeaderProps {
   isMobile?: boolean;
 }
 
 export function EditorHeader({ isMobile }: EditorHeaderProps) {
-  const { activeResume, setActiveSection, updateResumeTitle } =
-    useResumeStore();
-  const { menuSections = [], activeSection } = activeResume || {};
-  const { errors, selectError } = useGrammarCheck();
-  const router = useRouter();
-  const t = useTranslations();
-  const visibleSections = menuSections
-    ?.filter((section) => section.enabled)
-    .sort((a, b) => a.order - b.order);
-
-  const [backupConfigured, setBackupConfigured] = useState<boolean | null>(null);
-  const [backupPath, setBackupPath] = useState<string>("");
-
-  useEffect(() => {
-    const checkBackup = async () => {
-      try {
-        const handle = await getFileHandle("syncDirectory");
-        const path = await getConfig("syncDirectoryPath");
-        setBackupConfigured(!!handle);
-        setBackupPath(path || "");
-      } catch {
-        setBackupConfigured(false);
-      }
-    };
-    checkBackup();
-  }, []);
+  const { activeResume, updateResumeTitle } = useResumeStore()
+  const router = useRouter()
 
   return (
     <motion.header
-      className={`h-16 border-b sticky top-0 z-10`}
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
+      className={'h-16 border-b sticky top-0 z-10'}
+      initial={{ y: -20, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.3 }}
     >
-      <div className="flex items-center justify-between px-6 h-full pr-2">
-        <div className="flex items-center space-x-4 scrollbar-hide">
-          <motion.div
-            className="flex items-center space-x-2 shrink-0 cursor-pointer"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => { router.back() }}
-          >
-            <ArrowLeft />
-          </motion.div>
-
-
+      <div className="flex items-center justify-between px-4 sm:px-6 h-full pr-2">
+        <div className="cursor-pointer" onClick={() => router.back()}>
+          <ArrowLeft />
         </div>
-
         <div className="flex items-center space-x-3">
-          <GrammarCheckDrawer />
-          {errors.length > 0 && (
-            <div
-              className="flex items-center space-x-1 cursor-pointer animate-pulse"
-              onClick={() => document.dispatchEvent(new CustomEvent('open-grammar-drawer'))}
-            >
-              <AlertCircle className="w-4 h-4 text-red-500" />
-              <span className="text-sm text-red-500">
-                {t("grammarCheck.found_issues", { count: errors.length })}
-              </span>
-            </div>
-          )}
           <Input
-            key={activeResume?.id || "resume-title"}
-            defaultValue={activeResume?.title || ""}
+            key={activeResume?.id || 'resume-title'}
+            defaultValue={activeResume?.title || ''}
             onBlur={(e) => {
-              updateResumeTitle(e.target.value || "未命名简历");
+              updateResumeTitle(e.target.value || '未命名简历')
             }}
-            className="w-60  text-sm hidden md:block"
+            className="w-[150px] text-sm"
             placeholder="简历名称"
           />
-
           <div className="md:flex items-center ">
             <PdfExport />
           </div>
         </div>
       </div>
     </motion.header>
-  );
+  )
 }
 

@@ -1,30 +1,23 @@
-import { useResumeStore } from "@/store/useResumeStore";
-import { cn } from "@/lib/utils";
-import Field from "../Field";
+import Field from '../Field'
+import { useResumeStore } from '@/store/useResumeStore'
 
 const SkillPanel = () => {
-  const { activeResume, updateSkillContent } = useResumeStore();
-  const { skillContent } = activeResume || {};
+  const { activeResume, updateSkillContent } = useResumeStore()
+  const { skillContent } = activeResume || {}
   const handleChange = (value: string) => {
-    updateSkillContent(value);
-  };
+    updateSkillContent(value)
+  }
 
   return (
-    <div
-      className={cn(
-        "rounded-lg border p-4",
-        "bg-card",
-        "border-border"
-      )}
-    >
+    <div className="rounded-lg border p-4 bg-card border-border">
       <Field
-        value={skillContent}
+        value={skillContent || ''}
         onChange={handleChange}
         type="editor"
         placeholder="描述你的技能、专长等..."
       />
     </div>
-  );
-};
+  )
+}
 
-export default SkillPanel;
+export default SkillPanel

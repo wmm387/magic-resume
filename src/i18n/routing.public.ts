@@ -1,10 +1,9 @@
-import { createNavigation } from "@/i18n/compat/navigation";
-import { defineRouting } from "@/i18n/compat/navigation";
-import { defaultLocale, locales } from "./config";
+import { defaultLocale, locales } from './config'
+import { createNavigation, defineRouting } from '@/i18n/compat/navigation'
 
 export const routing = defineRouting({
   locales,
   defaultLocale,
-});
+})
 
-export const { Link, usePathname } = createNavigation(routing);
+export const { Link, usePathname } = createNavigation(routing)

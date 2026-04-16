@@ -1,56 +1,44 @@
-import { cn } from "@/lib/utils";
-import { useResumeStore } from "@/store/useResumeStore";
-import { Reorder } from "framer-motion";
-import { PlusCircle } from "lucide-react";
-import { useTranslations } from "@/i18n/compat/client";
-import { Button } from "@/components/ui/button";
-import ProjectItem from "./ProjectItem";
-import { Project } from "@/types/resume";
-import { generateUUID } from "@/utils/uuid";
+import { Reorder } from 'framer-motion'
+import { PlusCircle } from 'lucide-react'
+import ProjectItem from './ProjectItem'
+import type { Project } from '@/types/resume'
+import { useResumeStore } from '@/store/useResumeStore'
+import { useTranslations } from '@/i18n/compat/client'
+import { Button } from '@/components/ui/button'
+import { generateUUID } from '@/utils/uuid'
 
 const ProjectPanel = () => {
-  const t = useTranslations("workbench.projectPanel");
+  const t = useTranslations('workbench.projectPanel')
   const { activeResume, updateProjects, updateProjectsBatch } =
-    useResumeStore();
-  const { projects = [] } = activeResume || {};
+    useResumeStore()
+  const { projects = [] } = activeResume || {}
   const handleCreateProject = () => {
     const newProject: Project = {
       id: generateUUID(),
-      name: t("defaultProject.name"),
-      role: t("defaultProject.role"),
-      date: t("defaultProject.date"),
-      description: t("defaultProject.description"),
+      name: t('defaultProject.name'),
+      role: t('defaultProject.role'),
+      date: t('defaultProject.date'),
+      description: t('defaultProject.description'),
       visible: true,
-    };
-    updateProjects(newProject);
-  };
+    }
+    updateProjects(newProject)
+  }
 
   return (
-    <div
-      className={cn(
-        "space-y-4 px-4 py-4 rounded-lg",
-        "bg-card border-border",
-      )}
+    <Reorder.Group
+      values={projects}
+      onReorder={newOrder => updateProjectsBatch(newOrder)}
+      className="space-y-3 px-2 pb-2"
     >
-      <Reorder.Group
-        axis="y"
-        values={projects}
-        onReorder={(newOrder) => {
-          updateProjectsBatch(newOrder);
-        }}
-        className="space-y-3"
-      >
-        {projects.map((project) => (
-          <ProjectItem key={project.id} project={project}></ProjectItem>
-        ))}
+      {projects.map((project) => (
+        <ProjectItem key={project.id} project={project} />
+      ))}
+      <Button onClick={handleCreateProject} className="w-full">
+        <PlusCircle className="w-4 h-4 mr-2" />
+        {t('addButton')}
+      </Button>
+    </Reorder.Group>
+  )
+}
 
-        <Button onClick={handleCreateProject} className="w-full">
-          <PlusCircle className="w-4 h-4 mr-2" />
-          {t("addButton")}
-        </Button>
-      </Reorder.Group>
-    </div>
-  );
-};
-
-export default ProjectPanel;
+export default ProjectPanel

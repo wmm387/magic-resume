@@ -1,56 +1,43 @@
-import { cn } from "@/lib/utils";
-import { Reorder } from "framer-motion";
-import { PlusCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useTranslations } from "@/i18n/compat/client";
-import ExperienceItem from "./ExperienceItem";
-import { Experience } from "@/types/resume";
-import { useResumeStore } from "@/store/useResumeStore";
-import { generateUUID } from "@/utils/uuid";
+import { Reorder } from 'framer-motion'
+import { PlusCircle } from 'lucide-react'
+import ExperienceItem from './ExperienceItem'
+import type { Experience } from '@/types/resume'
+import { Button } from '@/components/ui/button'
+import { useTranslations } from '@/i18n/compat/client'
+import { useResumeStore } from '@/store/useResumeStore'
+import { generateUUID } from '@/utils/uuid'
 
 const ExperiencePanel = () => {
-  const t = useTranslations("workbench.experiencePanel");
-  const { activeResume, updateExperience, updateExperienceBatch } =
-    useResumeStore();
-  const { experience = [] } = activeResume || {};
+  const t = useTranslations('workbench.experiencePanel')
+  const { activeResume, updateExperience, updateExperienceBatch } = useResumeStore()
+  const { experience = [] } = activeResume || {}
   const handleCreateProject = () => {
     const newProject: Experience = {
       id: generateUUID(),
-      company: t("defaultProject.company"),
-      position: t("defaultProject.position"),
-      date: t("defaultProject.date"),
-      details: t("defaultProject.details"),
+      company: t('defaultProject.company'),
+      position: t('defaultProject.position'),
+      date: t('defaultProject.date'),
+      details: t('defaultProject.details'),
       visible: true,
-    };
-    updateExperience(newProject);
-  };
+    }
+    updateExperience(newProject)
+  }
 
   return (
-    <div
-      className={cn(
-        "space-y-4 px-4 py-4 rounded-lg",
-        "bg-card border-border"
-      )}
+    <Reorder.Group
+      values={experience}
+      onReorder={newOrder => updateExperienceBatch(newOrder)}
+      className="space-y-3 px-2 pb-2"
     >
-      <Reorder.Group
-        axis="y"
-        values={experience}
-        onReorder={(newOrder) => {
-          updateExperienceBatch(newOrder);
-        }}
-        className="space-y-3"
-      >
-        {experience.map((item) => (
-          <ExperienceItem key={item.id} experience={item}></ExperienceItem>
-        ))}
+      {experience.map((item) => (
+        <ExperienceItem key={item.id} experience={item} />
+      ))}
+      <Button onClick={handleCreateProject} className="w-full">
+        <PlusCircle className="w-4 h-4 mr-2" />
+        {t('addButton')}
+      </Button>
+    </Reorder.Group>
+  )
+}
 
-        <Button onClick={handleCreateProject} className="w-full">
-          <PlusCircle className="w-4 h-4 mr-2" />
-          {t("addButton")}
-        </Button>
-      </Reorder.Group>
-    </div>
-  );
-};
-
-export default ExperiencePanel;
+export default ExperiencePanel

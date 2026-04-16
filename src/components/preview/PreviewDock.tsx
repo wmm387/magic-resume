@@ -1,41 +1,38 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState } from 'react'
 import {
-  Edit2,
-  PanelRightClose,
-  PanelRightOpen,
-  SpellCheck2,
-  Home,
   Copy,
   Download,
-  Loader2,
+  Edit2,
   Eye,
-  FileText
-} from "lucide-react";
-import { RiMarkdownLine } from "@remixicon/react";
-import { toast } from "sonner";
-import { motion } from "framer-motion";
-import { useTranslations } from "@/i18n/compat/client";
-import { useRouter } from "@/lib/navigation";
-import { exportResumeAsMarkdown, exportToPdf } from "@/utils/export";
-import { Dock, DockIcon } from "@/components/magicui/dock";
+  FileText,
+  Home,
+  Loader2,
+  PanelRightClose,
+  PanelRightOpen,
+} from 'lucide-react'
+import { RiMarkdownLine } from '@remixicon/react'
+import { toast } from 'sonner'
+import { motion } from 'framer-motion'
+import { FAQDialog } from './FAQDialog'
+import { Dock, DockIcon } from './DockComp'
+import { useTranslations } from '@/i18n/compat/client'
+import { useRouter } from '@/lib/navigation'
+import { exportResumeAsMarkdown, exportToPdf } from '@/utils/export'
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger
-} from "@/components/ui/tooltip";
+} from '@/components/ui/tooltip'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
-import TemplateSheet from "@/components/shared/TemplateSheet";
-import { cn } from "@/lib/utils";
-import { useGrammarCheck } from "@/hooks/useGrammarCheck";
-import { useResumeStore } from "@/store/useResumeStore";
-import { useAIConfiguration } from "@/hooks/useAIConfiguration";
-import { FAQDialog } from "./FAQDialog";
+} from '@/components/ui/dropdown-menu'
+import TemplateSheet from '@/components/shared/TemplateSheet'
+import { cn } from '@/lib/utils'
+import { useResumeStore } from '@/store/useResumeStore'
 
 export type IconProps = React.HTMLAttributes<SVGElement>;
 
@@ -58,7 +55,7 @@ const Icons = {
       ></path>
     </svg>
   )
-};
+}
 
 const MagicThread = ({ height = 40 }: { height?: number }) => (
   <div className="relative flex flex-col items-center" style={{ height }}>
@@ -69,17 +66,17 @@ const MagicThread = ({ height = 40 }: { height?: number }) => (
     <motion.div
       className="absolute top-0 w-[1px] h-4 bg-gradient-to-b from-transparent via-primary to-transparent"
       animate={{
-        top: ["0%", "100%"],
+        top: ['0%', '100%'],
         opacity: [0, 1, 0],
       }}
       transition={{
         duration: 2.5,
         repeat: Infinity,
-        ease: "easeInOut",
+        ease: 'easeInOut',
       }}
     />
   </div>
-);
+)
 const PreviewDock = ({
   sidePanelCollapsed,
   editPanelCollapsed,
@@ -89,30 +86,29 @@ const PreviewDock = ({
   togglePreviewPanel,
   resumeContentRef
 }: PreviewDockProps) => {
-  const router = useRouter();
-  const t = useTranslations("previewDock");
-  const tPdf = useTranslations("pdfExport");
-  const tBasicField = useTranslations("workbench.basicPanel.basicFields");
-  const { checkGrammar, isChecking } = useGrammarCheck();
-  const [isExporting, setIsExporting] = useState(false);
-  const [isExportingJson, setIsExportingJson] = useState(false);
-  const [isExportingMarkdown, setIsExportingMarkdown] = useState(false);
+  const router = useRouter()
+  const t = useTranslations('previewDock')
+  const tPdf = useTranslations('pdfExport')
+  const tBasicField = useTranslations('workbench.basicPanel.basicFields')
+  const [isExporting, setIsExporting] = useState(false)
+  const [isExportingJson, setIsExportingJson] = useState(false)
+  const [isExportingMarkdown, setIsExportingMarkdown] = useState(false)
 
-  const { duplicateResume, setActiveResume, activeResumeId, activeResume, updateGlobalSettings } = useResumeStore();
-  const { globalSettings = {}, title } = activeResume || {};
+  const { duplicateResume, setActiveResume, activeResumeId, activeResume, updateGlobalSettings } = useResumeStore()
+  const { globalSettings = {}, title } = activeResume || {}
 
   const handleExportPdf = async () => {
     await exportToPdf({
-      elementId: "resume-preview",
-      title: title || "resume",
+      elementId: 'resume-preview',
+      title: title || 'resume',
       pagePadding: globalSettings?.pagePadding || 0,
       fontFamily: globalSettings?.fontFamily,
       onStart: () => setIsExporting(true),
       onEnd: () => setIsExporting(false),
-      successMessage: tPdf("toast.success"),
-      errorMessage: tPdf("toast.error")
-    });
-  };
+      successMessage: tPdf('toast.success'),
+      errorMessage: tPdf('toast.error')
+    })
+  }
 
   const handleExportMarkdown = () => {
     exportResumeAsMarkdown({
@@ -120,71 +116,42 @@ const PreviewDock = ({
       title,
       onStart: () => setIsExportingMarkdown(true),
       onEnd: () => setIsExportingMarkdown(false),
-      successMessage: tPdf("toast.markdownSuccess"),
-      errorMessage: tPdf("toast.markdownError"),
+      successMessage: tPdf('toast.markdownSuccess'),
+      errorMessage: tPdf('toast.markdownError'),
       markdownOptions: {
         basicFieldLabels: {
-          name: tBasicField("name"),
-          title: tBasicField("title"),
-          employementStatus: tBasicField("employementStatus"),
-          birthDate: tBasicField("birthDate"),
-          email: tBasicField("email"),
-          phone: tBasicField("phone"),
-          location: tBasicField("location")
+          name: tBasicField('name'),
+          title: tBasicField('title'),
+          employementStatus: tBasicField('employementStatus'),
+          birthDate: tBasicField('birthDate'),
+          email: tBasicField('email'),
+          phone: tBasicField('phone'),
+          location: tBasicField('location')
         }
       }
-    });
-  };
-
-  const { checkConfiguration } = useAIConfiguration();
-
-  // ... (keep other hooks)
-
-  const handleGrammarCheck = useCallback(async () => {
-    if (!checkConfiguration()) {
-      return;
-    }
-
-    try {
-      const previewContent =
-        resumeContentRef.current || document.getElementById("resume-preview");
-      if (!previewContent) {
-        toast.error(t("grammarCheck.errorToast"));
-        return;
-      }
-
-      const text = previewContent.innerText?.trim();
-      if (!text) {
-        toast.error(t("grammarCheck.errorToast"));
-        return;
-      }
-
-      await checkGrammar(text);
-    } catch (error) {
-      toast.error(t("grammarCheck.errorToast"));
-    }
-  }, [resumeContentRef, checkConfiguration, checkGrammar, t]);
+    })
+  }
 
   const handleCopyResume = useCallback(() => {
-    if (!activeResumeId) return;
+    if (!activeResumeId) return
     try {
-      const newId = duplicateResume(activeResumeId);
-      const targetPath = `/app/workbench/${newId}`;
-      setActiveResume(newId);
-      toast.success(t("copyResume.success"));
-      router.push(targetPath);
+      const newId = duplicateResume(activeResumeId)
+      const targetPath = `/app/workbench/${newId}`
+      setActiveResume(newId)
+      toast.success(t('copyResume.success'))
+      router.push(targetPath)
 
       requestAnimationFrame(() => {
         if (window.location.pathname !== targetPath) {
-          window.location.assign(targetPath);
+          window.location.assign(targetPath)
         }
-      });
+      })
     } catch (error) {
-      toast.error(t("copyResume.error"));
+      toast.error(t('copyResume.error'))
     }
-  }, [activeResumeId, duplicateResume, router, setActiveResume, t]);
+  }, [activeResumeId, duplicateResume, router, setActiveResume, t])
 
-  const isLoading = isExporting || isExportingJson || isExportingMarkdown;
+  const isLoading = isExporting || isExportingJson || isExportingMarkdown
 
   return (
     <>
@@ -197,15 +164,15 @@ const PreviewDock = ({
                   <TooltipTrigger asChild>
                     <div
                       className={cn(
-                        "flex cursor-pointer h-7 w-7 items-center justify-center rounded-lg",
-                        "hover:bg-gray-100/50 dark:hover:bg-neutral-800/50"
+                        'flex cursor-pointer h-7 w-7 items-center justify-center rounded-lg',
+                        'hover:bg-gray-100/50 dark:hover:bg-neutral-800/50'
                       )}
                     >
                       <TemplateSheet />
                     </div>
                   </TooltipTrigger>
                   <TooltipContent side="left" sideOffset={10}>
-                    <p>{t("switchTemplate")}</p>
+                    <p>{t('switchTemplate')}</p>
                   </TooltipContent>
                 </Tooltip>
               </DockIcon>
@@ -240,29 +207,29 @@ const PreviewDock = ({
                   <TooltipTrigger asChild>
                     <div
                       className={cn(
-                        "flex cursor-pointer h-7 w-7 items-center justify-center rounded-lg",
-                        "hover:bg-gray-100/50 dark:hover:bg-neutral-800/50",
-                        "transition-all duration-200",
+                        'flex cursor-pointer h-7 w-7 items-center justify-center rounded-lg',
+                        'hover:bg-gray-100/50 dark:hover:bg-neutral-800/50',
+                        'transition-all duration-200',
                         globalSettings?.autoOnePage && [
-                          "bg-primary text-primary-foreground",
-                          "hover:bg-primary/90 dark:hover:bg-primary/90",
-                          "shadow-sm"
+                          'bg-primary text-primary-foreground',
+                          'hover:bg-primary/90 dark:hover:bg-primary/90',
+                          'shadow-sm'
                         ]
                       )}
                       onClick={() => {
-                        updateGlobalSettings({ autoOnePage: !globalSettings?.autoOnePage });
+                        updateGlobalSettings({ autoOnePage: !globalSettings?.autoOnePage })
                         toast.success(
                           globalSettings?.autoOnePage
-                            ? t("autoOnePage.disabled")
-                            : t("autoOnePage.enabled")
-                        );
+                            ? t('autoOnePage.disabled')
+                            : t('autoOnePage.enabled')
+                        )
                       }}
                     >
                       <FileText className="h-4 w-4" />
                     </div>
                   </TooltipTrigger>
                   <TooltipContent side="left" sideOffset={10}>
-                    <p>{t("autoOnePage.tooltip")}</p>
+                    <p>{t('autoOnePage.tooltip')}</p>
                   </TooltipContent>
                 </Tooltip>
               </DockIcon>
@@ -273,10 +240,10 @@ const PreviewDock = ({
                       <DropdownMenuTrigger asChild>
                         <div
                           className={cn(
-                            "flex cursor-pointer h-7 w-7 items-center justify-center rounded-lg",
-                            "hover:bg-gray-100/50 dark:hover:bg-neutral-800/50",
-                            "transition-all duration-200",
-                            isLoading && "animate-pulse"
+                            'flex cursor-pointer h-7 w-7 items-center justify-center rounded-lg',
+                            'hover:bg-gray-100/50 dark:hover:bg-neutral-800/50',
+                            'transition-all duration-200',
+                            isLoading && 'animate-pulse'
                           )}
                         >
                           {isLoading ? (
@@ -288,7 +255,7 @@ const PreviewDock = ({
                       </DropdownMenuTrigger>
                     </TooltipTrigger>
                     <TooltipContent side="left" sideOffset={10}>
-                      <p>{t("export.tooltip")}</p>
+                      <p>{t('export.tooltip')}</p>
                     </TooltipContent>
                   </Tooltip>
                   <DropdownMenuContent align="end" side="left">
@@ -297,14 +264,14 @@ const PreviewDock = ({
                       disabled={isLoading}
                     >
                       <Download className="w-4 h-4 mr-2" />
-                      {t("export.pdf")}
+                      {t('export.pdf')}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={handleExportMarkdown}
                       disabled={isLoading}
                     >
                       <RiMarkdownLine className="w-4 h-4 mr-2" />
-                      {t("export.markdown")}
+                      {t('export.markdown')}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -314,8 +281,8 @@ const PreviewDock = ({
                   <TooltipTrigger asChild>
                     <div
                       className={cn(
-                        "flex cursor-pointer h-7 w-7 items-center justify-center rounded-lg",
-                        "hover:bg-gray-100/50 dark:hover:bg-neutral-800/50"
+                        'flex cursor-pointer h-7 w-7 items-center justify-center rounded-lg',
+                        'hover:bg-gray-100/50 dark:hover:bg-neutral-800/50'
                       )}
                       onClick={handleCopyResume}
                     >
@@ -323,7 +290,7 @@ const PreviewDock = ({
                     </div>
                   </TooltipTrigger>
                   <TooltipContent side="left" sideOffset={10}>
-                    <p>{t("copyResume.tooltip")}</p>
+                    <p>{t('copyResume.tooltip')}</p>
                   </TooltipContent>
                 </Tooltip>
               </DockIcon>
@@ -334,13 +301,13 @@ const PreviewDock = ({
                     <button
                       onClick={toggleSidePanel}
                       className={cn(
-                        "flex h-[30px] w-[30px] items-center justify-center rounded-sm transition-all",
-                        "hover:bg-gray-100/50 dark:hover:bg-neutral-800/50",
-                        "active:scale-95",
+                        'flex h-[30px] w-[30px] items-center justify-center rounded-sm transition-all',
+                        'hover:bg-gray-100/50 dark:hover:bg-neutral-800/50',
+                        'active:scale-95',
                         !sidePanelCollapsed && [
-                          "bg-primary text-primary-foreground",
-                          "hover:bg-primary/90 dark:hover:bg-primary/90",
-                          "shadow-sm"
+                          'bg-primary text-primary-foreground',
+                          'hover:bg-primary/90 dark:hover:bg-primary/90',
+                          'shadow-sm'
                         ]
                       )}
                     >
@@ -351,8 +318,8 @@ const PreviewDock = ({
                   <TooltipContent side="left" sideOffset={10}>
                     <p>
                       {sidePanelCollapsed
-                        ? t("sidePanel.expand")
-                        : t("sidePanel.collapse")}
+                        ? t('sidePanel.expand')
+                        : t('sidePanel.collapse')}
                     </p>
                   </TooltipContent>
                 </Tooltip>
@@ -363,13 +330,13 @@ const PreviewDock = ({
                     <button
                       onClick={toggleEditPanel}
                       className={cn(
-                        "flex h-[30px] w-[30px] items-center justify-center rounded-sm transition-all",
-                        "hover:bg-gray-100/50 dark:hover:bg-neutral-800/50",
-                        "active:scale-95",
+                        'flex h-[30px] w-[30px] items-center justify-center rounded-sm transition-all',
+                        'hover:bg-gray-100/50 dark:hover:bg-neutral-800/50',
+                        'active:scale-95',
                         !editPanelCollapsed && [
-                          "bg-primary text-primary-foreground",
-                          "hover:bg-primary/90 dark:hover:bg-primary/90",
-                          "shadow-sm"
+                          'bg-primary text-primary-foreground',
+                          'hover:bg-primary/90 dark:hover:bg-primary/90',
+                          'shadow-sm'
                         ]
                       )}
                     >
@@ -378,8 +345,8 @@ const PreviewDock = ({
                   </TooltipTrigger>
                   <TooltipContent side="left" sideOffset={10}>
                     {editPanelCollapsed
-                      ? t("editPanel.expand")
-                      : t("editPanel.collapse")}
+                      ? t('editPanel.expand')
+                      : t('editPanel.collapse')}
                   </TooltipContent>
                 </Tooltip>
               </DockIcon>
@@ -389,13 +356,13 @@ const PreviewDock = ({
                     <button
                       onClick={togglePreviewPanel}
                       className={cn(
-                        "flex h-[30px] w-[30px] items-center justify-center rounded-sm transition-all",
-                        "hover:bg-gray-100/50 dark:hover:bg-neutral-800/50",
-                        "active:scale-95",
+                        'flex h-[30px] w-[30px] items-center justify-center rounded-sm transition-all',
+                        'hover:bg-gray-100/50 dark:hover:bg-neutral-800/50',
+                        'active:scale-95',
                         !previewPanelCollapsed && [
-                          "bg-primary text-primary-foreground",
-                          "hover:bg-primary/90 dark:hover:bg-primary/90",
-                          "shadow-sm"
+                          'bg-primary text-primary-foreground',
+                          'hover:bg-primary/90 dark:hover:bg-primary/90',
+                          'shadow-sm'
                         ]
                       )}
                     >
@@ -404,8 +371,8 @@ const PreviewDock = ({
                   </TooltipTrigger>
                   <TooltipContent side="left" sideOffset={10}>
                     {previewPanelCollapsed
-                      ? t("previewPanel.expand")
-                      : t("previewPanel.collapse")}
+                      ? t('previewPanel.expand')
+                      : t('previewPanel.collapse')}
                   </TooltipContent>
                 </Tooltip>
               </DockIcon>
@@ -416,16 +383,16 @@ const PreviewDock = ({
                   <TooltipTrigger asChild>
                     <div
                       className={cn(
-                        "flex cursor-pointer h-7 w-7 items-center justify-center rounded-lg",
-                        "hover:bg-gray-100/50 dark:hover:bg-neutral-800/50"
+                        'flex cursor-pointer h-7 w-7 items-center justify-center rounded-lg',
+                        'hover:bg-gray-100/50 dark:hover:bg-neutral-800/50'
                       )}
-                      onClick={() => router.push("/app/dashboard")}
+                      onClick={() => router.push('/app/dashboard')}
                     >
                       <Home className="h-4 w-4" />
                     </div>
                   </TooltipTrigger>
                   <TooltipContent side="left" sideOffset={10}>
-                    <p>{t("backToDashboard")}</p>
+                    <p>{t('backToDashboard')}</p>
                   </TooltipContent>
                 </Tooltip>
               </DockIcon>
@@ -440,7 +407,7 @@ const PreviewDock = ({
         </div>
       </div>
     </>
-  );
-};
+  )
+}
 
-export default PreviewDock;
+export default PreviewDock

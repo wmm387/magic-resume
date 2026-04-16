@@ -1,5 +1,5 @@
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
-import { X } from "lucide-react";
+import { X } from 'lucide-react'
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer'
 
 interface BaseDrawerProps {
   title: string;
@@ -10,13 +10,13 @@ interface BaseDrawerProps {
 
 export function BaseDrawer({ title, open, onOpenChange, children }: BaseDrawerProps) {
 
-  if (!open) return null;
+  if (!open) return null
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent
         aria-describedby={undefined}
-        className="max-h-[85vh] h-[85vh] p-0 overflow-hidden backdrop-blur-2xl shadow-2xl rounded-t-[2rem] flex flex-col"
+        className="h-[85vh] p-0 overflow-hidden backdrop-blur-2xl shadow-2xl rounded-t-[2rem] flex flex-col"
       >
         <DrawerHeader className="bg-background/95">
           <div className="flex items-center justify-between">
@@ -37,7 +37,7 @@ export function BaseDrawer({ title, open, onOpenChange, children }: BaseDrawerPr
         </div>
       </DrawerContent>
     </Drawer>
-  );
+  )
 }
 
-export default BaseDrawer;
+export default BaseDrawer

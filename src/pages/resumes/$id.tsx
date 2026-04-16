@@ -1,11 +1,11 @@
 
 import React, { useEffect, useState } from 'react'
+import { MobileEditor } from './components/MobileEditor'
 import { EditorHeader } from '@/components/editor/EditorHeader'
 import { SidePanel } from '@/components/editor/SidePanel'
 import { EditPanel } from '@/components/editor/EditPanel'
 import PreviewPanel from '@/components/preview'
 import PreviewDock from '@/components/preview/PreviewDock'
-import { MobileWorkbench } from '@/components/mobile/MobileWorkbench'
 import {
   ResizableHandle,
   ResizablePanel,
@@ -87,7 +87,6 @@ export default function ResumePage() {
     // 监听 resize
     const handleResize = () => {
       // 屏幕改变时，如果此时预览面板收起，也可以让侧边栏展开
-      console.log('🚀 ~ handleResize ~ previewPanelCollapsed:', previewPanelCollapsed)
       if (previewPanelCollapsed) return
 
       if (window.innerWidth < 1440) {
@@ -151,17 +150,32 @@ export default function ResumePage() {
 
     // 确保总和为 100
     const total = newSizes.reduce((a, b) => a + b, 0)
-    if (total < 100) {
-      const lastNonZeroIndex = newSizes
-        .map((size, index) => ({ size, index }))
-        .filter(({ size }) => size > 0)
-        .pop()?.index
+    if (total !== 100) {
+      // 重新计算尺寸，确保总和为 100%
+      const nonZeroSizes = newSizes.filter(size => size > 0)
+      if (nonZeroSizes.length > 0) {
+        const ratio = 100 / total
+        const adjustedSizes = newSizes.map(size => size > 0 ? Math.round(size * ratio) : 0)
 
-      if (lastNonZeroIndex !== undefined) {
-        newSizes[lastNonZeroIndex] += 100 - total
+        // 再次确保总和为 100
+        const adjustedTotal = adjustedSizes.reduce((a, b) => a + b, 0)
+        if (adjustedTotal !== 100) {
+          const lastNonZeroIndex = adjustedSizes
+            .map((size, index) => ({ size, index }))
+            .filter(({ size }) => size > 0)
+            .pop()?.index
+
+          if (lastNonZeroIndex !== undefined) {
+            adjustedSizes[lastNonZeroIndex] += 100 - adjustedTotal
+          }
+        }
+        updateLayout([...adjustedSizes])
+      } else {
+        updateLayout([...newSizes])
       }
+    } else {
+      updateLayout([...newSizes])
     }
-    updateLayout([...newSizes])
   }, [sidePanelCollapsed, editPanelCollapsed, previewPanelCollapsed])
 
   return (
@@ -173,6 +187,11 @@ export default function ResumePage() {
       )}
     >
       <EditorHeader />
+      {/* 移动端布局 */}
+      <div className="md:hidden h-[calc(100vh-64px)]">
+        <MobileEditor />
+      </div>
+
       {/* 桌面端布局 */}
       <div className="hidden md:block h-[calc(100vh-64px)] relative flex w-full">
         <div className={cn(
@@ -237,14 +256,7 @@ export default function ResumePage() {
                 className="h-full overflow-y-auto"
                 data-preview-scroll-container="true"
               >
-                <PreviewPanel
-                  sidePanelCollapsed={sidePanelCollapsed}
-                  editPanelCollapsed={editPanelCollapsed}
-                  previewPanelCollapsed={previewPanelCollapsed}
-                  toggleSidePanel={toggleSidePanel}
-                  toggleEditPanel={toggleEditPanel}
-                  togglePreviewPanel={togglePreviewPanel}
-                />
+                <PreviewPanel />
               </div>
             </ResizablePanel>
           </ResizablePanelGroup>
@@ -259,11 +271,6 @@ export default function ResumePage() {
           togglePreviewPanel={togglePreviewPanel}
           resumeContentRef={resumeContentRef}
         />
-      </div>
-
-      {/* 移动端布局 */}
-      <div className="md:hidden h-[calc(100vh-64px)]">
-        <MobileWorkbench />
       </div>
     </main>
   )

@@ -1,22 +1,17 @@
 
-import React, { useEffect, useMemo, useState, useRef } from "react";
-import throttle from "lodash/throttle";
-import { toast } from "sonner";
-import { DEFAULT_TEMPLATES } from "@/config";
-import { cn } from "@/lib/utils";
-import { useResumeStore } from "@/store/useResumeStore";
-import { useAutoOnePage } from "@/hooks/useAutoOnePage";
-import { useTranslations } from "@/i18n/compat/client";
-import { normalizeFontFamily } from "@/utils/fonts";
-import ResumeTemplateComponent from "../templates";
+import React, { useEffect, useMemo, useRef, useState } from 'react'
+import throttle from 'lodash/throttle'
+import { toast } from 'sonner'
+import ResumeTemplateComponent from '../templates'
+import { DEFAULT_TEMPLATES } from '@/config'
+import { cn } from '@/lib/utils'
+import { useResumeStore } from '@/store/useResumeStore'
+import { useAutoOnePage } from '@/hooks/useAutoOnePage'
+import { useTranslations } from '@/i18n/compat/client'
+import { normalizeFontFamily } from '@/utils/fonts'
 
 interface PreviewPanelProps {
-  sidePanelCollapsed: boolean;
-  editPanelCollapsed: boolean;
-  previewPanelCollapsed: boolean;
-  toggleSidePanel: () => void;
-  toggleEditPanel: () => void;
-  togglePreviewPanel: () => void;
+  onSectionClick?: () => void;
 }
 
 const PageBreakLine = React.memo(
@@ -32,7 +27,7 @@ const PageBreakLine = React.memo(
     // 预览中 #resume-preview 有 padding-top，内容从 pagePadding 位置开始
     // 每页能容纳 contentPerPagePx 高度的内容（与 Puppeteer PDF margin 一致）
     // 第 N 页结束位置 = pagePadding + N * contentPerPagePx
-    const top = pagePadding + pageNumber * contentPerPagePx;
+    const top = pagePadding + pageNumber * contentPerPagePx
 
     return (
       <div
@@ -46,61 +41,51 @@ const PageBreakLine = React.memo(
           </div>
         </div>
       </div>
-    );
+    )
   }
-);
+)
 
-PageBreakLine.displayName = "PageBreakLine";
+PageBreakLine.displayName = 'PageBreakLine'
 
 const PreviewPanel = React.forwardRef<HTMLDivElement, PreviewPanelProps>(
-  (
-    {
-      sidePanelCollapsed,
-      editPanelCollapsed,
-      previewPanelCollapsed,
-      toggleSidePanel,
-      toggleEditPanel,
-      togglePreviewPanel,
-    },
-    ref
-  ) => {
-    const { activeResume, setActiveSection } = useResumeStore();
+  ({ onSectionClick, }, ref) => {
+    const { activeResume, setActiveSection } = useResumeStore()
     const selectedFontFamily = normalizeFontFamily(
       activeResume?.globalSettings?.fontFamily
-    );
-    const t = useTranslations("previewDock");
+    )
+    const t = useTranslations('previewDock')
     const template = useMemo(() => {
       return (
         DEFAULT_TEMPLATES.find((t) => t.id === activeResume?.templateId) ||
         DEFAULT_TEMPLATES[0]
-      );
-    }, [activeResume?.templateId]);
+      )
+    }, [activeResume?.templateId])
 
-    const startRef = useRef<HTMLDivElement>(null);
-    const previewRef = useRef<HTMLDivElement>(null);
-    const internalResumeContentRef = useRef<HTMLDivElement>(null);
-    const resumeContentRef = (ref as React.MutableRefObject<HTMLDivElement>) || internalResumeContentRef;
-    const [contentHeight, setContentHeight] = useState(0);
+    const startRef = useRef<HTMLDivElement>(null)
+    const previewRef = useRef<HTMLDivElement>(null)
+    const internalResumeContentRef = useRef<HTMLDivElement>(null)
+    const resumeContentRef = (ref as React.MutableRefObject<HTMLDivElement>) || internalResumeContentRef
+    const [contentHeight, setContentHeight] = useState(0)
 
     const updateContentHeight = () => {
       if (resumeContentRef.current) {
-        const height = resumeContentRef.current.clientHeight;
+        const height = resumeContentRef.current.clientHeight
         if (height > 0) {
           if (height !== contentHeight) {
-            setContentHeight(height);
+            setContentHeight(height)
           }
         }
       }
-    };
+    }
 
     useEffect(() => {
       const debouncedUpdate = throttle(() => {
         requestAnimationFrame(() => {
-          updateContentHeight();
-        });
-      }, 100);
+          updateContentHeight()
+        })
+      }, 100)
 
-      const observer = new MutationObserver(debouncedUpdate);
+      const observer = new MutationObserver(debouncedUpdate)
 
       if (resumeContentRef.current) {
         observer.observe(resumeContentRef.current, {
@@ -108,93 +93,94 @@ const PreviewPanel = React.forwardRef<HTMLDivElement, PreviewPanelProps>(
           subtree: true,
           attributes: true,
           characterData: true,
-        });
+        })
 
-        updateContentHeight();
+        updateContentHeight()
       }
 
-      const resizeObserver = new ResizeObserver(debouncedUpdate);
+      const resizeObserver = new ResizeObserver(debouncedUpdate)
 
       if (resumeContentRef.current) {
-        resizeObserver.observe(resumeContentRef.current);
+        resizeObserver.observe(resumeContentRef.current)
       }
 
       return () => {
-        observer.disconnect();
-        resizeObserver.disconnect();
-      };
-    }, []);
+        observer.disconnect()
+        resizeObserver.disconnect()
+      }
+    }, [])
 
     useEffect(() => {
       if (activeResume) {
-        const timer = setTimeout(updateContentHeight, 300);
-        return () => clearTimeout(timer);
+        const timer = setTimeout(updateContentHeight, 300)
+        return () => clearTimeout(timer)
       }
-    }, [activeResume]);
+    }, [activeResume])
 
-    const pagePadding = activeResume?.globalSettings?.pagePadding || 0;
-    const autoOnePageEnabled = activeResume?.globalSettings?.autoOnePage || false;
+    const pagePadding = activeResume?.globalSettings?.pagePadding || 0
+    const autoOnePageEnabled = activeResume?.globalSettings?.autoOnePage || false
 
     const { scaleFactor, isScaled, cannotFit } = useAutoOnePage({
       contentHeight,
       pagePadding,
       enabled: autoOnePageEnabled,
-    });
+    })
 
     useEffect(() => {
       if (cannotFit) {
-        toast.warning(t("autoOnePage.cannotFit"), {
+        toast.warning(t('autoOnePage.cannotFit'), {
           duration: 4000,
-        });
+        })
       }
-    }, [cannotFit, t]);
+    }, [cannotFit, t])
 
     const { contentPerPagePx, pageBreakCount } = useMemo(() => {
-      const MM_TO_PX = 3.78;
-      const A4_HEIGHT_PX = 297 * MM_TO_PX;
+      const MM_TO_PX = 3.78
+      const A4_HEIGHT_PX = 297 * MM_TO_PX
 
       // 与 Puppeteer PDF 导出一致：margin: pagePadding px（上下各一份）
       // 每页可用内容高度 = A4 总高度 - 上 margin - 下 margin
-      const baseContentPerPage = A4_HEIGHT_PX - 2 * pagePadding;
+      const baseContentPerPage = A4_HEIGHT_PX - 2 * pagePadding
 
       // 一页纸模式启用且内容能完美一页时，才隐藏分页线
       // cannotFit 时内容仍超出一页，需要保留分页线
       if ((isScaled && !cannotFit) || contentHeight <= 0) {
-        return { contentPerPagePx: baseContentPerPage, pageBreakCount: 0 };
+        return { contentPerPagePx: baseContentPerPage, pageBreakCount: 0 }
       }
 
       // 缩放时，在容器本地坐标系下每页能容纳更多内容
       // 因为视觉上 effectiveContentPerPage * scaleFactor = baseContentPerPage
       const effectiveContentPerPage = isScaled
         ? baseContentPerPage / scaleFactor
-        : baseContentPerPage;
+        : baseContentPerPage
 
       // contentHeight 包含 #resume-preview 的 padding（上+下）
       // 实际内容高度 = contentHeight - 2 * pagePadding
-      const actualContentHeight = contentHeight - 2 * pagePadding;
-      const pageCount = Math.max(1, Math.ceil(actualContentHeight / effectiveContentPerPage));
-      const pageBreakCount = Math.max(0, pageCount - 1);
+      const actualContentHeight = contentHeight - 2 * pagePadding
+      const pageCount = Math.max(1, Math.ceil(actualContentHeight / effectiveContentPerPage))
+      const pageBreakCount = Math.max(0, pageCount - 1)
 
-      return { contentPerPagePx: effectiveContentPerPage, pageBreakCount };
-    }, [contentHeight, pagePadding, isScaled, cannotFit, scaleFactor]);
+      return { contentPerPagePx: effectiveContentPerPage, pageBreakCount }
+    }, [contentHeight, pagePadding, isScaled, cannotFit, scaleFactor])
 
-    if (!activeResume) return null;
+    if (!activeResume) return null
 
     const handlePreviewClickCapture = (
       event: React.MouseEvent<HTMLDivElement>
     ) => {
-      const target = event.target as HTMLElement | null;
+      const target = event.target as HTMLElement | null
       const sectionElement = target?.closest<HTMLElement>(
-        "[data-resume-section-id]"
-      );
-      const sectionId = sectionElement?.dataset.resumeSectionId;
+        '[data-resume-section-id]'
+      )
+      const sectionId = sectionElement?.dataset.resumeSectionId
 
-      if (!sectionId || sectionId === activeResume.activeSection) {
-        return;
+      if (!sectionId) {
+        return
       }
 
-      setActiveSection(sectionId);
-    };
+      setActiveSection(sectionId)
+      onSectionClick?.()
+    }
 
     return (
       <div
@@ -204,14 +190,14 @@ const PreviewPanel = React.forwardRef<HTMLDivElement, PreviewPanelProps>(
           fontFamily: selectedFontFamily,
         }}
       >
-        <div className="py-4 ml-4 px-4 min-h-screen flex justify-center scale-[58%] origin-top md:scale-90 md:origin-top-left">
+        <div className="py-4 px-4 min-h-screen flex justify-center scale-[58%] origin-top md:scale-90 md:origin-top-left">
           <div
             ref={startRef}
             className={cn(
-              "w-[210mm] min-w-[210mm] min-h-[297mm]",
-              "bg-white",
-              "shadow-lg",
-              "relative mx-auto"
+              'w-[210mm] min-w-[210mm] min-h-[297mm]',
+              'bg-white',
+              'shadow-lg',
+              'relative mx-auto',
             )}
           >
             <div
@@ -224,7 +210,7 @@ const PreviewPanel = React.forwardRef<HTMLDivElement, PreviewPanelProps>(
                 ...(isScaled
                   ? {
                     transform: `scale(${scaleFactor})`,
-                    transformOrigin: "top left",
+                    transformOrigin: 'top left',
                     width: `${100 / scaleFactor}%`,
                   }
                   : {}),
@@ -277,10 +263,10 @@ const PreviewPanel = React.forwardRef<HTMLDivElement, PreviewPanelProps>(
                     {Array.from(
                       { length: Math.min(pageBreakCount, 20) },
                       (_, i) => {
-                        const pageNumber = i + 1;
+                        const pageNumber = i + 1
 
                         const pageLinePosition =
-                          pagePadding + pageNumber * contentPerPagePx;
+                          pagePadding + pageNumber * contentPerPagePx
 
                         if (pageLinePosition <= contentHeight) {
                           return (
@@ -290,9 +276,9 @@ const PreviewPanel = React.forwardRef<HTMLDivElement, PreviewPanelProps>(
                               contentPerPagePx={contentPerPagePx}
                               pagePadding={pagePadding}
                             />
-                          );
+                          )
                         }
-                        return null;
+                        return null
                       }
                     ).filter(Boolean)}
                   </div>
@@ -302,9 +288,9 @@ const PreviewPanel = React.forwardRef<HTMLDivElement, PreviewPanelProps>(
           </div>
         </div>
       </div>
-    );
-  });
+    )
+  })
 
-PreviewPanel.displayName = "PreviewPanel";
+PreviewPanel.displayName = 'PreviewPanel'
 
-export default PreviewPanel;
+export default PreviewPanel

@@ -1,18 +1,18 @@
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { useResumeStore } from "@/store/useResumeStore";
-import { Education } from "@/types/resume";
 import {
-  useDragControls,
+  AnimatePresence,
   Reorder,
   motion,
-  AnimatePresence,
-} from "framer-motion";
-import { GripVertical, Eye, EyeOff, ChevronDown, Trash2 } from "lucide-react";
-import { useState, useCallback } from "react";
-import Field from "../Field";
-import ThemeModal from "@/components/shared/ThemeModal";
-import { useTranslations } from "@/i18n/compat/client";
+  useDragControls,
+} from 'framer-motion'
+import { ChevronDown, Eye, EyeOff, GripVertical, Trash2 } from 'lucide-react'
+import { useCallback, useState } from 'react'
+import Field from '../Field'
+import type { Education } from '@/types/resume'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
+import { useResumeStore } from '@/store/useResumeStore'
+import ThemeModal from '@/components/shared/ThemeModal'
+import { useTranslations } from '@/i18n/compat/client'
 
 interface EducationEditorProps {
   education: Education;
@@ -25,60 +25,60 @@ const EducationEditor: React.FC<EducationEditorProps> = ({
   education,
   onSave,
 }) => {
-  const t = useTranslations("workbench.educationItem");
+  const t = useTranslations('workbench.educationItem')
   const handleChange = (field: keyof Education, value: string) => {
     onSave({
       ...education,
       [field]: value,
-    });
-  };
+    })
+  }
 
   return (
     <div className="space-y-5">
       <div className="grid gap-5">
         <div className="grid grid-cols-2 gap-4">
           <Field
-            label={t("labels.school")}
+            label={t('labels.school')}
             value={education.school}
-            onChange={(value) => handleChange("school", value)}
-            placeholder={t("placeholders.school")}
+            onChange={(value) => handleChange('school', value)}
+            placeholder={t('placeholders.school')}
           />
           <Field
-            label={t("labels.major")}
+            label={t('labels.major')}
             value={education.major}
-            onChange={(value) => handleChange("major", value)}
-            placeholder={t("placeholders.major")}
+            onChange={(value) => handleChange('major', value)}
+            placeholder={t('placeholders.major')}
           />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <Field
-            label={t("labels.degree")}
+            label={t('labels.degree')}
             value={education.degree}
-            onChange={(value) => handleChange("degree", value)}
-            placeholder={t("placeholders.degree")}
+            onChange={(value) => handleChange('degree', value)}
+            placeholder={t('placeholders.degree')}
           />
 
           <Field
-            label={t("labels.gpa")}
-            value={education.gpa || ""}
-            onChange={(value) => handleChange("gpa", value)}
-            placeholder={t("placeholders.gpa")}
+            label={t('labels.gpa')}
+            value={education.gpa || ''}
+            onChange={(value) => handleChange('gpa', value)}
+            placeholder={t('placeholders.gpa')}
           />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <Field
-            label={t("labels.startDate")}
+            label={t('labels.startDate')}
             value={education.startDate}
-            onChange={(value) => handleChange("startDate", value)}
+            onChange={(value) => handleChange('startDate', value)}
             type="date"
             placeholder="YYYY-MM"
           />
           <Field
-            label={t("labels.endDate")}
+            label={t('labels.endDate')}
             value={education.endDate}
-            onChange={(value) => handleChange("endDate", value)}
+            onChange={(value) => handleChange('endDate', value)}
             type="date"
             placeholder="YYYY-MM"
             showPresentSwitch={true}
@@ -86,41 +86,41 @@ const EducationEditor: React.FC<EducationEditorProps> = ({
         </div>
 
         <Field
-          label={t("labels.description")}
-          value={education.description}
-          onChange={(value) => handleChange("description", value)}
+          label={t('labels.description')}
+          value={education.description || ''}
+          onChange={(value) => handleChange('description', value)}
           type="editor"
-          placeholder={t("placeholders.description")}
+          placeholder={t('placeholders.description')}
         />
       </div>
     </div>
-  );
-};
+  )
+}
 
 const EducationItem = ({ education }: { education: Education }) => {
-  const { updateEducation, deleteEducation } = useResumeStore();
-  const dragControls = useDragControls();
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const { updateEducation, deleteEducation } = useResumeStore()
+  const dragControls = useDragControls()
+  const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [isUpdating, setIsUpdating] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
 
   const handleVisibilityToggle = useCallback(
     (e: React.MouseEvent) => {
-      e.stopPropagation();
+      e.stopPropagation()
 
-      if (isUpdating) return;
+      if (isUpdating) return
 
-      setIsUpdating(true);
+      setIsUpdating(true)
       setTimeout(() => {
         updateEducation({
           ...education,
           visible: !education.visible,
-        });
-        setIsUpdating(false);
-      }, 10);
+        })
+        setIsUpdating(false)
+      }, 10)
     },
     [education, updateEducation, isUpdating]
-  );
+  )
 
   return (
     <Reorder.Item
@@ -129,31 +129,31 @@ const EducationItem = ({ education }: { education: Education }) => {
       dragListener={false}
       dragControls={dragControls}
       className={cn(
-        "rounded-lg border overflow-hidden flex group",
-        "bg-card hover:border-primary/50",
-        "border-border"
+        'rounded-lg border overflow-hidden flex group',
+        'bg-card hover:border-primary/50',
+        'border-border'
       )}
     >
       <div
         onPointerDown={(event) => {
-          if (expandedId === education.id) return;
-          dragControls.start(event);
+          if (expandedId === education.id) return
+          dragControls.start(event)
         }}
         className={cn(
-          "w-12 flex items-center justify-center border-r shrink-0 touch-none",
-          "dark:border-neutral-800",
-          "border-border",
+          'w-12 flex items-center justify-center border-r shrink-0 touch-none',
+          'dark:border-neutral-800',
+          'border-border',
           expandedId === education.id
-            ? "cursor-not-allowed"
-            : "cursor-grab hover:bg-muted/50"
+            ? 'cursor-not-allowed'
+            : 'cursor-grab hover:bg-muted/50'
         )}
       >
         <GripVertical
           className={cn(
-            "w-4 h-4",
-            "text-muted-foreground",
-            expandedId === education.id && "opacity-50",
-            "transform transition-transform group-hover:scale-110"
+            'w-4 h-4',
+            'text-muted-foreground',
+            expandedId === education.id && 'opacity-50',
+            'transform transition-transform group-hover:scale-110'
           )}
         />
       </div>
@@ -161,40 +161,35 @@ const EducationItem = ({ education }: { education: Education }) => {
       <div className="flex-1 min-w-0">
         <div
           className={cn(
-            "px-4 py-4 flex items-center justify-between",
-            expandedId === education.id && "bg-muted/10",
-            "cursor-pointer select-none"
+            'px-4 py-4 flex items-center justify-between',
+            expandedId === education.id && 'bg-muted/10',
+            'cursor-pointer select-none'
           )}
           onClick={(e) => {
             if (expandedId === education.id) {
-              setExpandedId(null);
+              setExpandedId(null)
             } else {
-              setExpandedId(education.id);
+              setExpandedId(education.id)
             }
           }}
         >
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3">
-              <div>
-                <h3
-                  className={cn(
-                    "font-medium truncate",
-                    "text-foreground"
-                  )}
-                >
-                  {education.school || "未填写学校"}
+              <div className="flex-1 min-w-0 max-w-[150px]">
+                <h3 className="font-medium truncate text-foreground">
+                  {education.school || '未填写学校'}
                 </h3>
                 {(education.major || education.degree) && (
                   <p
                     className={cn(
-                      "text-sm truncate",
-                      "dark:text-neutral-400",
-                      "text-gray-500"
+                      'text-sm truncate',
+                      'dark:text-neutral-400',
+                      'text-gray-500'
                     )}
                   >
                     {[education.major, education.degree]
                       .filter(Boolean)
-                      .join(" · ")}
+                      .join(' · ')}
                   </p>
                 )}
               </div>
@@ -205,7 +200,7 @@ const EducationItem = ({ education }: { education: Education }) => {
               variant="ghost"
               size="sm"
               disabled={isUpdating}
-              className={cn("text-sm")}
+              className="text-sm px-1"
               onClick={handleVisibilityToggle}
             >
               {education.visible ? (
@@ -218,12 +213,12 @@ const EducationItem = ({ education }: { education: Education }) => {
               variant="ghost"
               size="sm"
               className={cn(
-                "text-sm",
-                "dark:hover:bg-red-900/50 dark:text-red-400 hover:bg-red-50 text-red-600"
+                'text-sm px-1',
+                'dark:hover:bg-red-900/50 dark:text-red-400 hover:bg-red-50 text-red-600'
               )}
               onClick={(e) => {
-                e.stopPropagation();
-                setDeleteDialogOpen(true);
+                e.stopPropagation()
+                setDeleteDialogOpen(true)
               }}
             >
               <Trash2 className="w-4 h-4" />
@@ -233,9 +228,9 @@ const EducationItem = ({ education }: { education: Education }) => {
               title={education.school}
               onClose={() => setDeleteDialogOpen(false)}
               onConfirm={() => {
-                deleteEducation(education.id);
-                setExpandedId(null);
-                setDeleteDialogOpen(false);
+                deleteEducation(education.id)
+                setExpandedId(null)
+                setDeleteDialogOpen(false)
               }}
             />
 
@@ -246,7 +241,7 @@ const EducationItem = ({ education }: { education: Education }) => {
               }}
             >
               <ChevronDown
-                className={cn("w-5 h-5", "text-muted-foreground")}
+                className={cn('w-5 h-5', 'text-muted-foreground')}
               />
             </motion.div>
           </div>
@@ -255,30 +250,30 @@ const EducationItem = ({ education }: { education: Education }) => {
           {expandedId === education.id && (
             <motion.div
               initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
+              animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.2 }}
               className="overflow-hidden"
             >
               <div
                 className={cn(
-                  "px-4 pb-4 space-y-4",
-                  "border-border"
+                  'px-4 pb-4 space-y-4',
+                  'border-border'
                 )}
                 onClick={(e) => e.stopPropagation()}
               >
                 <div
                   className={cn(
-                    "h-px w-full",
-                    "bg-border"
+                    'h-px w-full',
+                    'bg-border'
                   )}
                 />
                 <EducationEditor
                   education={education}
                   onSave={updateEducation}
                   onDelete={() => {
-                    deleteEducation(education.id);
-                    setExpandedId(null);
+                    deleteEducation(education.id)
+                    setExpandedId(null)
                   }}
                   onCancel={() => setExpandedId(null)}
                 />
@@ -288,7 +283,7 @@ const EducationItem = ({ education }: { education: Education }) => {
         </AnimatePresence>
       </div>
     </Reorder.Item>
-  );
-};
+  )
+}
 
-export default EducationItem;
+export default EducationItem

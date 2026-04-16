@@ -1,7 +1,7 @@
 
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { useTranslations } from "@/i18n/compat/client";
+import { useState } from 'react'
+import { motion } from 'framer-motion'
+import { useTranslations } from '@/i18n/compat/client'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,7 +11,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from '@/components/ui/alert-dialog'
 
 interface ThemedAlertDialogProps {
   isOpen: boolean;
@@ -26,56 +26,24 @@ const ThemeModal = ({
   onConfirm,
   title,
 }: ThemedAlertDialogProps) => {
-  const [isHovered, setIsHovered] = useState(false);
-  const t = useTranslations("themeModal.delete");
+  const [isHovered, setIsHovered] = useState(false)
+  const t = useTranslations('themeModal.delete')
 
   const modalContent = {
     delete: {
-      title: t("title"),
+      title: t('title'),
       description: (
-        <>
-          <span>
-            {t.raw("description").split("{title}")[0]}
-            <span className="px-2 font-semibold text-primary">{title}</span>
-          </span>
-          {t.raw("description").split("{title}")[1]}
-        </>
+        <span>
+          <span>您确定要删除</span>
+          <span className="px-2 font-semibold text-primary">{title}</span>
+          <span>吗？</span>
+        </span>
       ),
-      confirmText: t("confirmText"),
-      illustration: (
-        <svg
-          className="h-32 w-32"
-          viewBox="0 0 200 200"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <circle cx="100" cy="100" r="70" fill="hsl(262.1, 83.3%, 57.8%)" />
-          <rect
-            x="70"
-            y="85"
-            width="60"
-            height="40"
-            rx="5"
-            stroke="white"
-            strokeWidth="4"
-          />
-          <path
-            d="M85 85V75C85 70 90 65 95 65H105C110 65 115 70 115 75V85"
-            stroke="white"
-            strokeWidth="4"
-          />
-          <path
-            d="M80 95L120 115M120 95L80 115"
-            stroke="white"
-            strokeWidth="4"
-            strokeLinecap="round"
-          />
-        </svg>
-      ),
+      confirmText: t('confirmText')
     },
-  };
+  }
 
-  const content = modalContent["delete"];
+  const content = modalContent['delete']
 
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
@@ -84,21 +52,7 @@ const ThemeModal = ({
         className="max-w-md rounded-[32px] border-none dark:bg-neutral-900 bg-white p-0 shadow-xl"
       >
         <div className="relative overflow-hidden p-6">
-          <div className="absolute -left-16 -top-16 h-32 w-32 rounded-full bg-primary/20" />
-          <div className="absolute -bottom-16 -right-16 h-32 w-32 rounded-full bg-primary/20" />
-          <div className="absolute left-4 top-4 h-2 w-2 rounded-sm bg-primary" />
-          <div className="absolute bottom-4 right-4 h-2 w-2 rounded-sm bg-primary" />
-
           <div className="relative flex flex-col items-center">
-            <motion.div
-              initial={{ y: 10 }}
-              animate={{ y: 0 }}
-              transition={{ duration: 0.4 }}
-              className="mb-6"
-            >
-              {content.illustration}
-            </motion.div>
-
             <AlertDialogHeader>
               <AlertDialogTitle className="text-center text-xl font-bold text-gray-900 dark:text-neutral-200">
                 {content.title}
@@ -111,7 +65,7 @@ const ThemeModal = ({
 
             <AlertDialogFooter className="mt-8 flex w-full gap-4 sm:flex-row">
               <AlertDialogCancel className="flex-1 rounded-full dark:bg-gray-800 dark:text-neutral-200  text-base font-semibold text-gray-800 ">
-                {t("cancelText")}
+                {t('cancelText')}
               </AlertDialogCancel>
               <AlertDialogAction
                 onClick={onConfirm}
@@ -131,7 +85,7 @@ const ThemeModal = ({
         </div>
       </AlertDialogContent>
     </AlertDialog>
-  );
-};
+  )
+}
 
-export default ThemeModal;
+export default ThemeModal

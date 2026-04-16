@@ -1,6 +1,6 @@
-import { ImageIcon, Layout, PanelsLeftBottom } from "lucide-react";
-import { motion } from "framer-motion";
-import { useTranslations, useLocale } from "@/i18n/compat/client";
+import { ImageIcon, Layout, PanelsLeftBottom } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { useLocale, useTranslations } from '@/i18n/compat/client'
 import {
   Sheet,
   SheetContent,
@@ -8,12 +8,12 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet-no-overlay";
-import { cn } from "@/lib/utils";
-import { DEFAULT_TEMPLATES } from "@/config";
-import { useResumeStore } from "@/store/useResumeStore";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useTemplateSnapshots } from "@/hooks/useTemplateSnapshots";
+} from '@/components/ui/sheet-no-overlay'
+import { cn } from '@/lib/utils'
+import { DEFAULT_TEMPLATES } from '@/config'
+import { useResumeStore } from '@/store/useResumeStore'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { useTemplateSnapshots } from '@/hooks/useTemplateSnapshots'
 
 type TemplateItem = (typeof DEFAULT_TEMPLATES)[number];
 
@@ -34,10 +34,10 @@ const TemplatePreview = ({
     <button
       onClick={() => onSelect(template.id)}
       className={cn(
-        "relative group rounded-lg overflow-hidden border-2 transition-all duration-200 hover:scale-[1.02] text-left",
+        'relative group rounded-lg overflow-hidden border-2 transition-all duration-200 hover:scale-[1.02] text-left',
         isActive
-          ? "border-primary dark:border-primary shadow-lg dark:shadow-primary/30"
-          : "border-gray-100 hover:border-gray-200 dark:border-neutral-800 dark:hover:border-neutral-700"
+          ? 'border-primary dark:border-primary shadow-lg dark:shadow-primary/30'
+          : 'border-gray-100 hover:border-gray-200 dark:border-neutral-800 dark:hover:border-neutral-700'
       )}
     >
       <div className="relative aspect-[210/297] w-full overflow-hidden bg-gray-50 dark:bg-gray-900">
@@ -67,18 +67,18 @@ const TemplatePreview = ({
         </motion.div>
       )}
     </button>
-  );
-};
+  )
+}
 
 const TemplateSheet = () => {
-  const t = useTranslations("templates");
-  const locale = useLocale();
-  const { activeResume, setTemplate } = useResumeStore();
-  const { snapshotMap } = useTemplateSnapshots(locale);
+  const t = useTranslations('templates')
+  const locale = useLocale()
+  const { activeResume, setTemplate } = useResumeStore()
+  const { snapshotMap } = useTemplateSnapshots()
 
   const currentTemplate =
     DEFAULT_TEMPLATES.find((template) => template.id === activeResume?.templateId) ||
-    DEFAULT_TEMPLATES[0];
+    DEFAULT_TEMPLATES[0]
 
   return (
     <Sheet>
@@ -87,7 +87,7 @@ const TemplateSheet = () => {
       </SheetTrigger>
       <SheetContent side="left" forceMount className="w-1/2 sm:max-w-1/2">
         <SheetHeader>
-          <SheetTitle>{t("switchTemplate")}</SheetTitle>
+          <SheetTitle>{t('switchTemplate')}</SheetTitle>
         </SheetHeader>
         <SheetDescription />
 
@@ -108,7 +108,7 @@ const TemplateSheet = () => {
         </div>
       </SheetContent>
     </Sheet>
-  );
-};
+  )
+}
 
-export default TemplateSheet;
+export default TemplateSheet

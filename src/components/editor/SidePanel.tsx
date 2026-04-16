@@ -1,40 +1,41 @@
-import { useMemo } from "react";
-import { motion } from "framer-motion";
-import { Layout, Type, SpaceIcon, Palette, Zap } from "lucide-react";
-import debounce from "lodash/debounce";
-import { useTranslations } from "@/i18n/compat/client";
+import { useMemo } from 'react'
+import { motion } from 'framer-motion'
+import { Layout, Palette, Plus, SpaceIcon, Type, Zap } from 'lucide-react'
+import debounce from 'lodash/debounce'
+import LayoutSetting from './layout/LayoutSetting'
+import type { MenuSection } from '@/types/resume'
+import { useTranslations } from '@/i18n/compat/client'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import LayoutSetting from "./layout/LayoutSetting";
-import { useResumeStore } from "@/store/useResumeStore";
-import { cn } from "@/lib/utils";
-import { THEME_COLORS, MenuSection } from "@/types/resume";
-import { ColorPicker } from "@/components/ui/color-picker";
+} from '@/components/ui/select'
+import { Slider } from '@/components/ui/slider'
+import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
+import { Input } from '@/components/ui/input'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useResumeStore } from '@/store/useResumeStore'
+import { cn } from '@/lib/utils'
+import { THEME_COLORS } from '@/types/resume'
+import { ColorPicker } from '@/components/ui/color-picker'
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
-import { Plus } from "lucide-react";
-import { STANDARD_MODULES } from "@/config/modules";
-import { DEFAULT_TEMPLATES } from "@/config";
-import { getFontOptions, normalizeFontFamily } from "@/utils/fonts";
+} from '@/components/ui/popover'
+
+import { STANDARD_MODULES } from '@/config/modules'
+import { DEFAULT_TEMPLATES } from '@/config'
+import { getFontOptions, normalizeFontFamily } from '@/utils/fonts'
 
 const lineHeightOptions = [
-  { value: "normal", label: "默认" },
-  { value: "relaxed", label: "适中" },
-  { value: "loose", label: "宽松" },
-];
+  { value: 'normal', label: '默认' },
+  { value: 'relaxed', label: '适中' },
+  { value: 'loose', label: '宽松' },
+]
 
 function SettingCard({
   icon: Icon,
@@ -50,16 +51,16 @@ function SettingCard({
   return (
     <Card
       className={cn(
-        "border shadow-sm",
-        "bg-card border-border shadow-sm"
+        'border shadow-sm',
+        'bg-card border-border shadow-sm'
       )}
     >
       <CardHeader className="p-4 pb-0 flex flex-row items-center justify-between space-y-0">
         <CardTitle className="flex items-center gap-2 text-base font-medium">
           <Icon
-            className={cn("w-4 h-4 text-muted-foreground")}
+            className={cn('w-4 h-4 text-muted-foreground')}
           />
-          <span className={cn("text-foreground")}>
+          <span className={cn('text-foreground')}>
             {title}
           </span>
         </CardTitle>
@@ -67,7 +68,7 @@ function SettingCard({
       </CardHeader>
       <CardContent className="p-4">{children}</CardContent>
     </Card>
-  );
+  )
 }
 
 export function SidePanel() {
@@ -80,78 +81,78 @@ export function SidePanel() {
     setThemeColor,
     reorderSections,
     addCustomData,
-  } = useResumeStore();
+  } = useResumeStore()
   const {
     menuSections = [],
     globalSettings = {},
     activeSection,
-  } = activeResume || {};
+  } = activeResume || {}
 
-  const { themeColor = THEME_COLORS[0] } = globalSettings;
-  const t = useTranslations("workbench.sidePanel");
+  const { themeColor = THEME_COLORS[0] } = globalSettings
+  const t = useTranslations('workbench.sidePanel')
 
   const currentTemplate = DEFAULT_TEMPLATES.find(
     (t) => t.id === activeResume?.templateId
-  );
+  )
 
   const availableModules = useMemo(() => {
     return (
       currentTemplate?.availableSections
         ?.map((id) => STANDARD_MODULES[id])
         .filter(Boolean) || []
-    );
-  }, [currentTemplate]);
+    )
+  }, [currentTemplate])
 
   // 过滤掉 menuSections 中已存在的模块，避免重复添加和 key 冲突
   const filteredModules = useMemo(() => {
-    const existingIds = new Set(menuSections.map((s: MenuSection) => s.id));
-    return availableModules.filter((m) => !existingIds.has(m.id));
-  }, [availableModules, menuSections]);
+    const existingIds = new Set(menuSections.map((s: MenuSection) => s.id))
+    return availableModules.filter((m) => !existingIds.has(m.id))
+  }, [availableModules, menuSections])
 
-  const fontOptions = getFontOptions((key) => t(`typography.font.${key}`));
-  const selectedFontFamily = normalizeFontFamily(globalSettings?.fontFamily);
+  const fontOptions = getFontOptions((key) => t(`typography.font.${key}`))
+  const selectedFontFamily = normalizeFontFamily(globalSettings?.fontFamily)
 
   const lineHeightOptions = [
-    { value: "normal", label: t("typography.lineHeight.normal") },
-    { value: "relaxed", label: t("typography.lineHeight.relaxed") },
-    { value: "loose", label: t("typography.lineHeight.loose") },
-  ];
+    { value: 'normal', label: t('typography.lineHeight.normal') },
+    { value: 'relaxed', label: t('typography.lineHeight.relaxed') },
+    { value: 'loose', label: t('typography.lineHeight.loose') },
+  ]
 
   const debouncedSetColor = useMemo(
     () =>
       debounce((value: string) => {
-        setThemeColor(value);
+        setThemeColor(value)
       }, 100),
     []
-  );
+  )
 
   const generateCustomSectionId = (menuSections: any[]) => {
     const customSections = menuSections.filter((s) =>
-      s.id.startsWith("custom")
-    );
-    const nextNum = customSections.length + 1;
-    return `custom-${nextNum}`;
-  };
+      s.id.startsWith('custom')
+    )
+    const nextNum = customSections.length + 1
+    return `custom-${nextNum}`
+  }
 
   const handleCreateSection = () => {
-    const sectionId = generateCustomSectionId(menuSections);
+    const sectionId = generateCustomSectionId(menuSections)
     const newSection = {
       id: sectionId,
       title: sectionId,
-      icon: "➕",
+      icon: '➕',
       enabled: true,
       order: menuSections.length,
-    };
+    }
 
-    updateMenuSections([...menuSections, newSection]);
-    addCustomData(sectionId);
-  };
+    updateMenuSections([...menuSections, newSection])
+    addCustomData(sectionId)
+  }
   return (
     <div className="p-4 space-y-4">
-      <SettingCard icon={Layout} title={t("layout.title")}>
+      <SettingCard icon={Layout} title={t('layout.title')}>
         <LayoutSetting
           menuSections={menuSections}
-          activeSection={activeSection || ""}
+          activeSection={activeSection || ''}
           setActiveSection={setActiveSection}
           toggleSectionVisibility={toggleSectionVisibility}
           updateMenuSections={updateMenuSections}
@@ -167,7 +168,7 @@ export function SidePanel() {
                 className="flex justify-center w-full rounded-lg items-center gap-2 py-2 px-3 text-sm font-medium text-primary bg-primary/5 border border-dashed border-primary/20 hover:bg-primary/10 transition-colors"
               >
                 <Plus className="w-4 h-4" />
-                {t("layout.addCustomSection")}
+                {t('layout.addCustomSection')}
               </motion.button>
             </PopoverTrigger>
             <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-1" align="center">
@@ -183,8 +184,8 @@ export function SidePanel() {
                         icon: section.icon,
                         enabled: true,
                         order: menuSections.length,
-                      };
-                      updateMenuSections([...menuSections, newSection]);
+                      }
+                      updateMenuSections([...menuSections, newSection])
                     }}
                     className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-accent transition-colors text-left"
                   >
@@ -204,7 +205,7 @@ export function SidePanel() {
                   className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-accent transition-colors text-left text-muted-foreground italic"
                 >
                   <Plus className="w-4 h-4" />
-                  {t("layout.addCustomSectionOption")}
+                  {t('layout.addCustomSectionOption')}
                 </button>
               </div>
             </PopoverContent>
@@ -215,22 +216,22 @@ export function SidePanel() {
       {/* 主题色设置  */}
       <SettingCard
         icon={Palette}
-        title={t("theme.title")}
+        title={t('theme.title')}
         action={
           <ColorPicker
             value={themeColor}
             onChange={(value) => debouncedSetColor(value)}
             className={cn(
-              "h-7 w-auto px-3 py-0 rounded-full border shadow-none transition-all flex items-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1 focus:ring-offset-background",
+              'h-7 w-auto px-3 py-0 rounded-full border shadow-none transition-all flex items-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1 focus:ring-offset-background',
               !THEME_COLORS.includes(themeColor)
-                ? "border-primary/40 text-primary bg-primary/5 hover:bg-primary/10 hover:border-primary/60"
-                : "border-border text-muted-foreground bg-transparent hover:bg-accent/50 hover:text-foreground"
+                ? 'border-primary/40 text-primary bg-primary/5 hover:bg-primary/10 hover:border-primary/60'
+                : 'border-border text-muted-foreground bg-transparent hover:bg-accent/50 hover:text-foreground'
             )}
-            style={{ backgroundColor: "transparent" }}
-            title={t("theme.custom")}
+            style={{ backgroundColor: 'transparent' }}
+            title={t('theme.custom')}
           >
             <Palette className="w-3.5 h-3.5" />
-            <span className="text-xs font-medium">{t("theme.custom")}</span>
+            <span className="text-xs font-medium">{t('theme.custom')}</span>
 
             {!THEME_COLORS.includes(themeColor) && (
               <div
@@ -246,10 +247,10 @@ export function SidePanel() {
             <button
               key={presetTheme}
               className={cn(
-                "relative group w-6 h-6 rounded-full overflow-hidden transition-all duration-200 focus:outline-none",
+                'relative group w-6 h-6 rounded-full overflow-hidden transition-all duration-200 focus:outline-none',
                 themeColor === presetTheme
-                  ? "ring-2 ring-primary ring-offset-2 ring-offset-background"
-                  : "ring-1 ring-border hover:ring-primary/50 hover:scale-110"
+                  ? 'ring-2 ring-primary ring-offset-2 ring-offset-background'
+                  : 'ring-1 ring-border hover:ring-primary/50 hover:scale-110'
               )}
               onClick={() => setThemeColor(presetTheme)}
               title={presetTheme}
@@ -264,7 +265,7 @@ export function SidePanel() {
       </SettingCard>
 
       {/* 排版设置 */}
-      <SettingCard icon={Type} title={t("typography.title")}>
+      <SettingCard icon={Type} title={t('typography.title')}>
         <div className="space-y-6">
           <div className="space-y-2">
             <Label className="text-muted-foreground">
@@ -286,7 +287,7 @@ export function SidePanel() {
               </motion.div>
               <SelectContent
                 className={cn(
-                  "bg-popover border-border"
+                  'bg-popover border-border'
                 )}
               >
                 {fontOptions.map((font) => (
@@ -301,14 +302,14 @@ export function SidePanel() {
               </SelectContent>
             </Select>
             <p className="text-xs leading-5 text-muted-foreground">
-              {t("typography.font.note")}
+              {t('typography.font.note')}
             </p>
           </div>
 
           {/* 行高选择 */}
           <div className="space-y-2">
             <Label className="text-muted-foreground">
-              {t("typography.lineHeight.title")}
+              {t('typography.lineHeight.title')}
             </Label>
             <div className="flex items-center gap-4">
               <Slider
@@ -328,7 +329,7 @@ export function SidePanel() {
 
           <div className="space-y-2">
             <Label className="text-muted-foreground">
-              {t("typography.baseFontSize.title")}
+              {t('typography.baseFontSize.title')}
             </Label>
             <Select
               value={globalSettings?.baseFontSize?.toString()}
@@ -346,7 +347,7 @@ export function SidePanel() {
               </motion.div>
               <SelectContent
                 className={cn(
-                  "bg-popover border-border"
+                  'bg-popover border-border'
                 )}
               >
                 {[12, 13, 14, 15, 16, 18, 20, 24].map((size) => (
@@ -364,7 +365,7 @@ export function SidePanel() {
 
           <div className="space-y-2">
             <Label className="text-muted-foreground">
-              {t("typography.headerSize.title")}
+              {t('typography.headerSize.title')}
             </Label>
             <Select
               value={globalSettings?.headerSize?.toString()}
@@ -382,7 +383,7 @@ export function SidePanel() {
               </motion.div>
               <SelectContent
                 className={cn(
-                  "bg-popover border-border"
+                  'bg-popover border-border'
                 )}
               >
                 {[12, 13, 14, 15, 16, 18, 20, 24].map((size) => (
@@ -400,7 +401,7 @@ export function SidePanel() {
 
           <div className="space-y-2">
             <Label className="text-muted-foreground">
-              {t("typography.subheaderSize.title")}
+              {t('typography.subheaderSize.title')}
             </Label>
             <Select
               value={globalSettings?.subheaderSize?.toString()}
@@ -418,7 +419,7 @@ export function SidePanel() {
               </motion.div>
               <SelectContent
                 className={cn(
-                  "bg-popover border-border"
+                  'bg-popover border-border'
                 )}
               >
                 {[12, 13, 14, 15, 16, 18, 20, 24].map((size) => (
@@ -437,11 +438,11 @@ export function SidePanel() {
       </SettingCard>
 
       {/* 间距设置 */}
-      <SettingCard icon={SpaceIcon} title={t("spacing.title")}>
+      <SettingCard icon={SpaceIcon} title={t('spacing.title')}>
         <div className="space-y-6">
           <div className="space-y-2">
             <Label className="text-muted-foreground">
-              {t("spacing.pagePadding.title")}
+              {t('spacing.pagePadding.title')}
             </Label>
             <div className="flex items-center gap-4">
               <Slider
@@ -463,9 +464,9 @@ export function SidePanel() {
                     step={1}
                     value={globalSettings?.pagePadding || 0}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                      const value = Number(e.target.value);
+                      const value = Number(e.target.value)
                       if (!isNaN(value) && value >= 0 && value <= 100) {
-                        updateGlobalSettings?.({ pagePadding: value });
+                        updateGlobalSettings?.({ pagePadding: value })
                       }
                     }}
                     className="h-full w-12 border-0 text-center focus-visible:ring-0 focus-visible:ring-offset-0 no-spinner"
@@ -475,11 +476,11 @@ export function SidePanel() {
                       type="button"
                       className="flex h-4 w-8 items-center justify-center border-b border-input bg-transparent text-muted-foreground hover:bg-accent"
                       onClick={() => {
-                        const currentValue = globalSettings?.pagePadding || 0;
+                        const currentValue = globalSettings?.pagePadding || 0
                         if (currentValue < 100) {
                           updateGlobalSettings?.({
                             pagePadding: currentValue + 1,
-                          });
+                          })
                         }
                       }}
                     >
@@ -502,11 +503,11 @@ export function SidePanel() {
                       type="button"
                       className="flex h-4 w-8 items-center justify-center bg-transparent text-muted-foreground hover:bg-accent"
                       onClick={() => {
-                        const currentValue = globalSettings?.pagePadding || 0;
+                        const currentValue = globalSettings?.pagePadding || 0
                         if (currentValue > 0) {
                           updateGlobalSettings?.({
                             pagePadding: currentValue - 1,
-                          });
+                          })
                         }
                       }}
                     >
@@ -536,7 +537,7 @@ export function SidePanel() {
 
           <div className="space-y-2">
             <Label className="text-muted-foreground">
-              {t("spacing.sectionSpacing.title")}
+              {t('spacing.sectionSpacing.title')}
             </Label>
             <div className="flex items-center gap-4">
               <Slider
@@ -558,9 +559,9 @@ export function SidePanel() {
                     step={1}
                     value={globalSettings?.sectionSpacing || 0}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                      const value = Number(e.target.value);
+                      const value = Number(e.target.value)
                       if (!isNaN(value) && value >= 1 && value <= 100) {
-                        updateGlobalSettings?.({ sectionSpacing: value });
+                        updateGlobalSettings?.({ sectionSpacing: value })
                       }
                     }}
                     className="h-full w-12 border-0 text-center focus-visible:ring-0 focus-visible:ring-offset-0 no-spinner"
@@ -571,11 +572,11 @@ export function SidePanel() {
                       className="flex h-4 w-8 items-center justify-center border-b border-input bg-transparent text-muted-foreground hover:bg-accent"
                       onClick={() => {
                         const currentValue =
-                          globalSettings?.sectionSpacing || 0;
+                          globalSettings?.sectionSpacing || 0
                         if (currentValue < 100) {
                           updateGlobalSettings?.({
                             sectionSpacing: currentValue + 1,
-                          });
+                          })
                         }
                       }}
                     >
@@ -599,11 +600,11 @@ export function SidePanel() {
                       className="flex h-4 w-8 items-center justify-center bg-transparent text-muted-foreground hover:bg-accent"
                       onClick={() => {
                         const currentValue =
-                          globalSettings?.sectionSpacing || 0;
+                          globalSettings?.sectionSpacing || 0
                         if (currentValue > 1) {
                           updateGlobalSettings?.({
                             sectionSpacing: currentValue - 1,
-                          });
+                          })
                         }
                       }}
                     >
@@ -633,7 +634,7 @@ export function SidePanel() {
 
           <div className="space-y-2">
             <Label className="text-muted-foreground">
-              {t("spacing.paragraphSpacing.title")}
+              {t('spacing.paragraphSpacing.title')}
             </Label>
             <div className="flex items-center gap-4">
               <Slider
@@ -655,9 +656,9 @@ export function SidePanel() {
                     step={1}
                     value={globalSettings?.paragraphSpacing || 0}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                      const value = Number(e.target.value);
+                      const value = Number(e.target.value)
                       if (!isNaN(value) && value >= 1) {
-                        updateGlobalSettings?.({ paragraphSpacing: value });
+                        updateGlobalSettings?.({ paragraphSpacing: value })
                       }
                     }}
                     className="h-full w-12 border-0 text-center focus-visible:ring-0 focus-visible:ring-offset-0 no-spinner"
@@ -668,11 +669,11 @@ export function SidePanel() {
                       className="flex h-4 w-8 items-center justify-center border-b border-input bg-transparent text-muted-foreground hover:bg-accent"
                       onClick={() => {
                         const currentValue =
-                          globalSettings?.paragraphSpacing || 0;
+                          globalSettings?.paragraphSpacing || 0
                         if (currentValue < 100) {
                           updateGlobalSettings?.({
                             paragraphSpacing: currentValue + 1,
-                          });
+                          })
                         }
                       }}
                     >
@@ -696,11 +697,11 @@ export function SidePanel() {
                       className="flex h-4 w-8 items-center justify-center bg-transparent text-muted-foreground hover:bg-accent"
                       onClick={() => {
                         const currentValue =
-                          globalSettings?.paragraphSpacing || 0;
+                          globalSettings?.paragraphSpacing || 0
                         if (currentValue > 1) {
                           updateGlobalSettings?.({
                             paragraphSpacing: currentValue - 1,
-                          });
+                          })
                         }
                       }}
                     >
@@ -731,11 +732,11 @@ export function SidePanel() {
       </SettingCard>
 
       {/* 模式设置 */}
-      <SettingCard icon={Zap} title={t("mode.title")}>
+      <SettingCard icon={Zap} title={t('mode.title')}>
         <div className="space-y-4">
           <div className="space-y-2">
             <Label className="text-muted-foreground">
-              {t("mode.useIconMode.title")}
+              {t('mode.useIconMode.title')}
             </Label>
             <div className="flex items-center gap-4">
               <Switch
@@ -751,7 +752,7 @@ export function SidePanel() {
 
           <div className="space-y-2">
             <Label className="text-muted-foreground">
-              {t("mode.centerSubtitle.title")}
+              {t('mode.centerSubtitle.title')}
             </Label>
             <div className="flex items-center gap-4">
               <Switch
@@ -767,7 +768,7 @@ export function SidePanel() {
 
           <div className="space-y-2">
             <Label className="text-muted-foreground">
-              {t("mode.flexibleHeaderLayout.title")}
+              {t('mode.flexibleHeaderLayout.title')}
             </Label>
             <div className="flex items-center gap-4">
               <Switch
@@ -783,5 +784,5 @@ export function SidePanel() {
         </div>
       </SettingCard>
     </div>
-  );
+  )
 }

@@ -1,19 +1,19 @@
 
-import { forwardRef, useMemo, useState } from "react";
-import { HexColorPicker } from "react-colorful";
-import { cn } from "@/lib/utils";
-import type { ButtonProps } from "@/components/ui/button";
-import { Button } from "@/components/ui/button";
+import { forwardRef, useMemo, useState } from 'react'
+import { HexColorPicker } from 'react-colorful'
+import { useForwardedRef } from '../../lib/use-forwarded-ref'
+import type { ButtonProps } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
-import { Input } from "@/components/ui/input";
-import { useForwardedRef } from "../../lib/use-forwarded-ref";
+} from '@/components/ui/popover'
+import { Input } from '@/components/ui/input'
 
 interface ColorPickerProps
-  extends Omit<ButtonProps, "value" | "onChange" | "onBlur"> {
+  extends Omit<ButtonProps, 'value' | 'onChange' | 'onBlur'> {
   value: string;
   onChange: (value: string) => void;
   onBlur?: () => void;
@@ -24,12 +24,12 @@ const ColorPicker = forwardRef<HTMLInputElement, ColorPickerProps>(
     { disabled, value, onChange, onBlur, name, className, ...props },
     forwardedRef
   ) => {
-    const ref = useForwardedRef(forwardedRef);
-    const [open, setOpen] = useState(false);
+    const ref = useForwardedRef(forwardedRef)
+    const [open, setOpen] = useState(false)
 
     const parsedValue = useMemo(() => {
-      return value || "#FFFFFF";
-    }, [value]);
+      return value || '#FFFFFF'
+    }, [value])
 
     return (
       <Popover open={open} onOpenChange={setOpen}>
@@ -38,13 +38,13 @@ const ColorPicker = forwardRef<HTMLInputElement, ColorPickerProps>(
             {...props}
             disabled={disabled}
             className={cn(
-              "w-[40px] h-[40px] rounded-lg cursor-pointer overflow-hidden p-0 border-2 transition-all hover:scale-105", 
+              'w-[40px] h-[40px] rounded-lg cursor-pointer overflow-hidden p-0 border-2 transition-all hover:scale-105',
               className
             )}
             onClick={() => setOpen(true)}
             style={{ backgroundColor: parsedValue, ...props.style }}
           >
-             {props.children || <span className="sr-only">Pick a color</span>}
+            {props.children || <span className="sr-only">Pick a color</span>}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-3">
@@ -54,17 +54,17 @@ const ColorPicker = forwardRef<HTMLInputElement, ColorPickerProps>(
             <Input
               maxLength={7}
               onChange={(e) => {
-                onChange(e.currentTarget.value.startsWith("#") ? e.currentTarget.value : `#${e.currentTarget.value}`);
+                onChange(e.currentTarget.value.startsWith('#') ? e.currentTarget.value : `#${e.currentTarget.value}`)
               }}
-              value={parsedValue.replace("#", "")}
+              value={parsedValue.replace('#', '')}
               className="h-8"
             />
           </div>
         </PopoverContent>
       </Popover>
-    );
+    )
   }
-);
-ColorPicker.displayName = "ColorPicker";
+)
+ColorPicker.displayName = 'ColorPicker'
 
-export { ColorPicker };
+export { ColorPicker }

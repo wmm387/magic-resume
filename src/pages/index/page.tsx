@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Plus } from 'lucide-react'
-import { CreateResumeDrawer } from './CreateResumeDrawer'
-import { ResumeCardItem } from './ResumeCardItem'
-import { useLocale, useTranslations } from '@/i18n/compat/client'
+import { CreateResumeDrawer } from './components/CreateResumeDrawer'
+import { ResumeCardItem } from './components/ResumeCardItem'
+import { useTranslations } from '@/i18n/compat/client'
 import { useRouter } from '@/lib/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card'
@@ -14,7 +14,6 @@ import { DEFAULT_TEMPLATES } from '@/config'
 
 export default function IndexPage() {
   const t = useTranslations()
-  const locale = useLocale()
   const { resumes, setActiveResume, deleteResume, createResume } = useResumeStore()
 
   const router = useRouter()
@@ -51,13 +50,13 @@ export default function IndexPage() {
   }
 
   return (
-    <ScrollArea className="h-[calc(100vh)] w-full">
+    <ScrollArea className="h-[100vh] w-full">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.3 }}
-        className="flex-1 space-y-6 py-8"
+        className="space-y-4 py-8"
       >
         <motion.div
           className="px-4 sm:px-6 flex items-center justify-between"
@@ -87,7 +86,7 @@ export default function IndexPage() {
         </motion.div>
 
         <motion.div
-          className="flex-1 w-full p-3 sm:p-6"
+          className="flex-1 w-full p-4 sm:p-6"
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.3, delay: 0.2 }}
@@ -137,7 +136,6 @@ export default function IndexPage() {
                     id={id}
                     resume={resume}
                     t={t}
-                    locale={locale}
                     setActiveResume={setActiveResume}
                     router={router}
                     deleteResume={deleteResume}

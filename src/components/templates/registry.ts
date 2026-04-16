@@ -1,29 +1,28 @@
-import React from "react";
-import { ResumeTemplate } from "@/types/template";
-
 // Import configs
-import { classicConfig } from "./classic/config";
-import { modernConfig } from "./modern/config";
-import { leftRightConfig } from "./left-right/config";
-import { timelineConfig } from "./timeline/config";
-import { minimalistConfig } from "./minimalist/config";
-import { elegantConfig } from "./elegant/config";
-import { creativeConfig } from "./creative/config";
-import { editorialConfig } from "./editorial/config";
+import { classicConfig } from './classic/config'
+import { modernConfig } from './modern/config'
+import { leftRightConfig } from './left-right/config'
+import { timelineConfig } from './timeline/config'
+import { minimalistConfig } from './minimalist/config'
+import { elegantConfig } from './elegant/config'
+import { creativeConfig } from './creative/config'
+import { editorialConfig } from './editorial/config'
 
 // Import components
-import ClassicTemplate from "./classic";
-import ModernTemplate from "./modern";
-import LeftRightTemplate from "./left-right";
-import TimelineTemplate from "./timeline";
-import MinimalistTemplate from "./minimalist";
-import ElegantTemplate from "./elegant";
-import CreativeTemplate from "./creative";
-import EditorialTemplate from "./editorial";
+import ClassicTemplate from './classic'
+import ModernTemplate from './modern'
+import LeftRightTemplate from './left-right'
+import TimelineTemplate from './timeline'
+import MinimalistTemplate from './minimalist'
+import ElegantTemplate from './elegant'
+import CreativeTemplate from './creative'
+import EditorialTemplate from './editorial'
+import type React from 'react'
+import type { ResumeTemplate } from '@/types/template'
 
 export interface TemplateRegistryEntry {
-  config: ResumeTemplate;
-  Component: React.FC<{ data: any; template: ResumeTemplate }>;
+  config: ResumeTemplate
+  Component: React.FC<{ data: any; template: ResumeTemplate }>
 }
 
 /**
@@ -40,19 +39,12 @@ export const TEMPLATE_REGISTRY: TemplateRegistryEntry[] = [
   { config: elegantConfig, Component: ElegantTemplate },
   { config: creativeConfig, Component: CreativeTemplate },
   { config: editorialConfig, Component: EditorialTemplate },
-];
+]
 
 /** All template configs — drop-in replacement for the old DEFAULT_TEMPLATES */
-export const DEFAULT_TEMPLATES: ResumeTemplate[] = TEMPLATE_REGISTRY.map(
-  (entry) => entry.config
-);
+export const DEFAULT_TEMPLATES: ResumeTemplate[] = TEMPLATE_REGISTRY.map((entry) => entry.config)
 
 /** Look up a template component by layout id */
-export function getTemplateComponent(
-  layout: string
-): React.FC<{ data: any; template: ResumeTemplate }> {
-  return (
-    TEMPLATE_REGISTRY.find((entry) => entry.config.layout === layout)
-      ?.Component ?? ClassicTemplate
-  );
+export function getTemplateComponent(layout: string): React.FC<{ data: any; template: ResumeTemplate }> {
+  return TEMPLATE_REGISTRY.find((entry) => entry.config.layout === layout)?.Component ?? ClassicTemplate
 }
