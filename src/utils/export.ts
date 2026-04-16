@@ -336,7 +336,8 @@ export const exportToPdf = async ({ elementId, title, pagePadding, fontFamily, o
     console.log(`Total export took ${performance.now() - exportStartTime}ms`)
   } catch (error) {
     console.error('Export error:', error)
-    if (errorMessage) toast.error(errorMessage)
+    // if (errorMessage) toast.error(errorMessage)
+    toast.error((error as any).toString() || errorMessage)
   } finally {
     onEnd?.()
   }

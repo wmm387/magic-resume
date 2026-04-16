@@ -20,8 +20,9 @@ export function MobileEditor() {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.2 }}
-          className="h-full overflow-y-auto bg-gray-100"
+          className="h-full bg-gray-100 overflow-y-auto"
           data-preview-scroll-container="true"
+          style={{ scrollbarWidth: 'none', }}
         >
           <PreviewPanel onSectionClick={() => setContentOpen(true)} />
         </motion.div>

@@ -4,7 +4,6 @@ import throttle from 'lodash/throttle'
 import { toast } from 'sonner'
 import ResumeTemplateComponent from '../templates'
 import { DEFAULT_TEMPLATES } from '@/config'
-import { cn } from '@/lib/utils'
 import { useResumeStore } from '@/store/useResumeStore'
 import { useAutoOnePage } from '@/hooks/useAutoOnePage'
 import { useTranslations } from '@/i18n/compat/client'
@@ -14,35 +13,32 @@ interface PreviewPanelProps {
   onSectionClick?: () => void;
 }
 
-const PageBreakLine = React.memo(
-  ({
-    pageNumber,
-    contentPerPagePx,
-    pagePadding,
-  }: {
-    pageNumber: number;
-    contentPerPagePx: number;
-    pagePadding: number;
-  }) => {
-    // 预览中 #resume-preview 有 padding-top，内容从 pagePadding 位置开始
-    // 每页能容纳 contentPerPagePx 高度的内容（与 Puppeteer PDF margin 一致）
-    // 第 N 页结束位置 = pagePadding + N * contentPerPagePx
-    const top = pagePadding + pageNumber * contentPerPagePx
+interface PageBreakLineProps {
+  pageNumber: number;
+  contentPerPagePx: number;
+  pagePadding: number;
+}
 
-    return (
-      <div
-        className="absolute left-0 right-0 pointer-events-none page-break-line"
-        style={{ top: `${top}px` }}
-      >
-        <div className="relative w-full">
-          <div className="absolute w-full border-t-2 border-dashed border-red-400" />
-          <div className="absolute right-0 -top-6 text-xs text-red-500">
-            第{pageNumber}页结束
-          </div>
+const PageBreakLine = React.memo(({ pageNumber, contentPerPagePx, pagePadding, }: PageBreakLineProps) => {
+  // 预览中 #resume-preview 有 padding-top，内容从 pagePadding 位置开始
+  // 每页能容纳 contentPerPagePx 高度的内容（与 Puppeteer PDF margin 一致）
+  // 第 N 页结束位置 = pagePadding + N * contentPerPagePx
+  const top = pagePadding + pageNumber * contentPerPagePx
+
+  return (
+    <div
+      className="absolute left-0 right-0 pointer-events-none page-break-line"
+      style={{ top: `${top}px` }}
+    >
+      <div className="relative w-full">
+        <div className="absolute w-full border-t-2 border-dashed border-red-400" />
+        <div className="absolute right-0 -top-6 text-xs text-red-500">
+          第{pageNumber}页结束
         </div>
       </div>
-    )
-  }
+    </div>
+  )
+}
 )
 
 PageBreakLine.displayName = 'PageBreakLine'
@@ -66,6 +62,31 @@ const PreviewPanel = React.forwardRef<HTMLDivElement, PreviewPanelProps>(
     const internalResumeContentRef = useRef<HTMLDivElement>(null)
     const resumeContentRef = (ref as React.MutableRefObject<HTMLDivElement>) || internalResumeContentRef
     const [contentHeight, setContentHeight] = useState(0)
+
+    // 屏幕宽度监听和缩放相关状态
+    const [screenWidth, setScreenWidth] = useState(window.innerWidth)
+
+    // 处理屏幕宽度变化
+    useEffect(() => {
+      const handleResize = throttle(() => {
+        setScreenWidth(window.innerWidth)
+      }, 100)
+
+      window.addEventListener('resize', handleResize)
+      return () => window.removeEventListener('resize', handleResize)
+    }, [])
+
+    // 计算基于屏幕宽度的缩放比例
+    const totalScaleFactor = useMemo(() => {
+      // A4纸宽度为210mm，考虑边距和留白
+      const A4_WIDTH_MM = 210
+      const containerPadding = 32 // 左右各20px边距
+      const availableWidth = screenWidth - containerPadding
+      const a4WidthPx = A4_WIDTH_MM * 3.78 // 转换为像素
+
+      // 计算最大缩放比例，确保A4纸能完全显示
+      return Math.min(1, availableWidth / a4WidthPx)
+    }, [screenWidth])
 
     const updateContentHeight = () => {
       if (resumeContentRef.current) {
@@ -185,20 +206,19 @@ const PreviewPanel = React.forwardRef<HTMLDivElement, PreviewPanelProps>(
     return (
       <div
         ref={previewRef}
-        className="relative w-full h-full  bg-gray-100"
-        style={{
-          fontFamily: selectedFontFamily,
-        }}
+        className="relative bg-gray-100 h-full"
+        style={{ fontFamily: selectedFontFamily, }}
       >
-        <div className="py-4 px-4 min-h-screen flex justify-center scale-[58%] origin-top md:scale-90 md:origin-top-left">
+        <div
+          className="py-5 px-5 min-h-screen flex justify-center "
+          style={{
+            transform: `scale(${isScaled ? totalScaleFactor * scaleFactor : totalScaleFactor})`,
+            transformOrigin: 'center top',
+          }}
+        >
           <div
             ref={startRef}
-            className={cn(
-              'w-[210mm] min-w-[210mm] min-h-[297mm]',
-              'bg-white',
-              'shadow-lg',
-              'relative mx-auto',
-            )}
+            className="w-[210mm] min-w-[210mm] min-h-[297mm] bg-white shadow-lg relative mx-auto"
           >
             <div
               ref={resumeContentRef}
@@ -207,13 +227,6 @@ const PreviewPanel = React.forwardRef<HTMLDivElement, PreviewPanelProps>(
               style={{
                 fontFamily: selectedFontFamily,
                 padding: `${activeResume.globalSettings?.pagePadding}px`,
-                ...(isScaled
-                  ? {
-                    transform: `scale(${scaleFactor})`,
-                    transformOrigin: 'top left',
-                    width: `${100 / scaleFactor}%`,
-                  }
-                  : {}),
               }}
               className="relative"
             >
