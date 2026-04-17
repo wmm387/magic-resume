@@ -1,9 +1,5 @@
 import { useState } from 'react'
-import {
-  ChevronDown,
-  Download,
-  Loader2
-} from 'lucide-react'
+import { Download, Loader2 } from 'lucide-react'
 import { RiMarkdownLine } from '@remixicon/react'
 import { useTranslations } from '@/i18n/compat/client'
 import { useResumeStore } from '@/store/useResumeStore'
@@ -34,7 +30,7 @@ const PdfExport = () => {
       onStart: () => setIsExporting(true),
       onEnd: () => setIsExporting(false),
       successMessage: t('toast.success'),
-      errorMessage: t('toast.error')
+      errorMessage: t('toast.error'),
     })
   }
 
