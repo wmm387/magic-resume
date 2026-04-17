@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronLeft, FilePlus, Sparkles, X } from 'lucide-react'
 import { VisuallyHidden } from '@heroui/react'
@@ -44,6 +44,18 @@ export const CreateResumeDrawer = ({ open, onOpenChange, onCreate }: CreateResum
       return () => window.clearTimeout(timeoutId)
     }
   }, [open])
+
+  const previewRef = useRef<HTMLDivElement>(null)
+  const [previewHeight, setPreviewHeight] = useState('100%')
+  useEffect(() => {
+    setTimeout(() => {
+      if (!previewRef.current) {
+        return '100%'
+      }
+      const { height } = previewRef.current.getBoundingClientRect()
+      setPreviewHeight(`${height - 32}px`)
+    }, 200)
+  }, [previewTarget])
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
@@ -195,14 +207,15 @@ export const CreateResumeDrawer = ({ open, onOpenChange, onCreate }: CreateResum
                 {/* Content Area */}
                 <div className="flex-1 flex flex-col overflow-hidden">
                   {/* Preview Area */}
-                  <div className="flex-1 bg-gray-50 dark:bg-gray-900/50 flex items-center justify-center p-6 overflow-hidden">
+                  <div ref={previewRef} className="flex-1 bg-gray-50 flex items-center justify-center p-4 overflow-hidden">
                     <motion.div
                       layoutId={`card-container-${previewTarget.id || 'blank'}`}
                       className="w-full max-w-lg flex items-center justify-center"
+                      style={{ height: previewHeight }}
                     >
                       <motion.div
                         layoutId={`card-image-${previewTarget.id || 'blank'}`}
-                        className="aspect-[210/297] rounded-xl overflow-hidden shadow-2xl shadow-black/10 dark:shadow-black/40 ring-1 ring-black/5 dark:ring-white/10 bg-white"
+                        className="aspect-[210/297] rounded-xl overflow-hidden shadow-2xl shadow-black/10 ring-1 ring-black/5 bg-white"
                         style={{
                           maxHeight: '100%',
                           maxWidth: '100%',
@@ -218,7 +231,7 @@ export const CreateResumeDrawer = ({ open, onOpenChange, onCreate }: CreateResum
                   </div>
 
                   {/* Info and Action Area */}
-                  <div className="bg-white dark:bg-gray-950 border-t border-gray-100 dark:border-gray-800 p-6">
+                  <div className="bg-white border-t border-gray-100 p-6">
                     <motion.div
                       layoutId={`card-title-${previewTarget.id || 'blank'}`}
                       className="inline-block w-full"

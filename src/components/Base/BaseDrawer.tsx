@@ -16,7 +16,7 @@ export function BaseDrawer({ title, open, onOpenChange, children }: BaseDrawerPr
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent
         aria-describedby={undefined}
-        className="h-[85vh] p-0 overflow-hidden backdrop-blur-2xl shadow-2xl rounded-t-[2rem] flex flex-col"
+        className="min-h-[90vh] h-[90vh] p-0 overflow-hidden backdrop-blur-2xl shadow-2xl rounded-t-[2rem] flex flex-col"
       >
         <DrawerHeader className="bg-background/95">
           <div className="flex items-center justify-between">

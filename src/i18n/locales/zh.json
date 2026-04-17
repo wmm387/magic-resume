@@ -239,7 +239,6 @@
         "name": "极简模板",
         "description": "大面积留白，干净纯粹的排版风格"
       },
-
       "elegant": {
         "name": "优雅模板",
         "description": "居中标题单列设计，具有高级感的分隔线"
@@ -301,7 +300,7 @@
           "misans": "MiSans",
           "notosanssc": "Noto Sans SC",
           "sourcehanserifsc": "思源宋体",
-          "note": "MiSans 依据其许可免费商用；使用本项目时请保留 MiSans 字体说明。"
+          "note": "MiSans 依据其许可免费商用。"
         },
         "lineHeight": {
           "title": "行高",
