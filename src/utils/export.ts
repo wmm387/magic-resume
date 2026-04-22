@@ -2,7 +2,7 @@ import { toast } from 'sonner'
 import type { ResumeData } from '@/types/resume'
 import type { ResumeMarkdownOptions } from '@/utils/markdown'
 import { PDF_EXPORT_CONFIG } from '@/config'
-import { normalizeFontFamily } from '@/utils/fonts'
+import { getFontFaceCss, normalizeFontFamily } from '@/utils/fonts'
 import { generateResumeMarkdown } from '@/utils/markdown'
 
 const INVALID_FILE_NAME_CHAR_REGEX = /[\\/:*?"<>|]/g
@@ -13,24 +13,33 @@ const getSafeFileName = (title?: string) => {
   return normalized || 'resume'
 }
 
-async function downloadViaIOS(blob: Blob, fileName: string) {
-  const reader = new FileReader()
-  const base64 = await new Promise((resolve, reject) => {
-    reader.onloadend = () => {
-      // data:application/pdf;base64,xxxx
-      const result = reader.result || ''
-      const b64 = String(result).split(',')[1]
-      resolve(b64)
-    }
-    reader.onerror = reject
-    reader.readAsDataURL(blob)
-  })
+async function downloadViaIOS(content: string, styles: string, pagePadding: number, fileName: string) {
   window.webkit?.messageHandlers?.iOS_Resume_Output?.postMessage({
+    content,
+    styles,
+    pagePadding,
     fileName,
-    mimeType: blob.type || 'application/octet-stream',
-    base64,
   })
 }
+
+// async function downloadViaIOS(blob: Blob, fileName: string) {
+//   const reader = new FileReader()
+//   const base64 = await new Promise((resolve, reject) => {
+//     reader.onloadend = () => {
+//       // data:application/pdf;base64,xxxx
+//       const result = reader.result || ''
+//       const b64 = String(result).split(',')[1]
+//       resolve(b64)
+//     }
+//     reader.onerror = reject
+//     reader.readAsDataURL(blob)
+//   })
+//   window.webkit?.messageHandlers?.iOS_Resume_Output?.postMessage({
+//     fileName,
+//     mimeType: blob.type || 'application/octet-stream',
+//     base64,
+//   })
+// }
 
 async function downloadMarkdownViaIOS(blob: Blob, fileName: string) {
   const reader = new FileReader()
@@ -198,43 +207,39 @@ export const exportResumeAsMarkdown = async ({ resume, title, onStart, onEnd, su
   }
 }
 
-export const exportToPdf = async ({ elementId, title, pagePadding, fontFamily, onStart, onEnd, successMessage, errorMessage, mode = 'server' }: ExportToPdfOptions) => {
-  const exportStartTime = performance.now()
-  onStart?.()
+const getCloneHtml = async (elementId: string, fontFamily?: string) => {
+  const pdfElement = document.querySelector<HTMLElement>(`#${elementId}`)
+  if (!pdfElement) {
+    throw new Error(`PDF element #${elementId} not found`)
+  }
 
-  try {
-    const pdfElement = document.querySelector<HTMLElement>(`#${elementId}`)
-    if (!pdfElement) {
-      throw new Error(`PDF element #${elementId} not found`)
-    }
+  const clonedElement = pdfElement.cloneNode(true) as HTMLElement
+  const selectedFontFamily = normalizeFontFamily(fontFamily)
 
-    const clonedElement = pdfElement.cloneNode(true) as HTMLElement
-    const selectedFontFamily = normalizeFontFamily(fontFamily)
+  // 移除 transform 缩放，确保导出尺寸正确
+  clonedElement.style.removeProperty('transform')
+  clonedElement.style.removeProperty('transform-origin')
+  clonedElement.style.setProperty('width', '100%', 'important')
 
-    // 移除 transform 缩放，确保导出尺寸正确
-    clonedElement.style.removeProperty('transform')
-    clonedElement.style.removeProperty('transform-origin')
-    clonedElement.style.setProperty('width', '100%', 'important')
+  // 设置基础样式
+  clonedElement.style.setProperty('padding', '0', 'important')
+  clonedElement.style.setProperty('box-sizing', 'border-box')
+  clonedElement.style.setProperty('font-family', selectedFontFamily, 'important')
+  clonedElement.style.setProperty('background', 'white', 'important')
+  clonedElement.style.setProperty('background-color', 'white', 'important')
 
-    // 设置基础样式
-    clonedElement.style.setProperty('padding', '0', 'important')
-    clonedElement.style.setProperty('box-sizing', 'border-box')
-    clonedElement.style.setProperty('font-family', selectedFontFamily, 'important')
-    clonedElement.style.setProperty('background', 'white', 'important')
-    clonedElement.style.setProperty('background-color', 'white', 'important')
+  // 隐藏分页线
+  const pageBreakLines = clonedElement.querySelectorAll<HTMLElement>('.page-break-line')
+  pageBreakLines.forEach((line) => {
+    line.style.display = 'none'
+  })
 
-    // 隐藏分页线
-    const pageBreakLines = clonedElement.querySelectorAll<HTMLElement>('.page-break-line')
-    pageBreakLines.forEach((line) => {
-      line.style.display = 'none'
-    })
+  // 优化图片
+  await optimizeImages(clonedElement)
 
-    // 优化图片
-    await optimizeImages(clonedElement)
+  const [capturedStyles] = await Promise.all([getOptimizedStyles()])
 
-    const [capturedStyles] = await Promise.all([getOptimizedStyles()])
-
-    const styles = `
+  const styles = `
         ${capturedStyles}
         html, body { background: white !important; background-color: white !important; }
         html, body, #${elementId} {
@@ -244,31 +249,38 @@ export const exportToPdf = async ({ elementId, title, pagePadding, fontFamily, o
         }
       `
 
-    const response = await fetch(PDF_EXPORT_CONFIG.SERVER_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        content: clonedElement.outerHTML,
-        styles,
-        margin: pagePadding,
-      }),
-      mode: 'cors',
-      signal: AbortSignal.timeout(PDF_EXPORT_CONFIG.TIMEOUT),
-    })
-    if (!response.ok) {
-      throw new Error(`PDF generation failed: ${response.status}`)
-    }
-    const blob = await response.blob()
+  return { clonedElement, styles }
+}
+
+export const exportToPdf = async ({ elementId, title, pagePadding, fontFamily, onStart, onEnd, successMessage, errorMessage, mode = 'server' }: ExportToPdfOptions) => {
+  const exportStartTime = performance.now()
+  onStart?.()
+  try {
+    const { clonedElement, styles } = await getCloneHtml(elementId, fontFamily)
+    // const response = await fetch(PDF_EXPORT_CONFIG.SERVER_URL, {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //   },
+    //   body: JSON.stringify({
+    //     content: clonedElement.outerHTML,
+    //     styles,
+    //     margin: pagePadding,
+    //   }),
+    //   mode: 'cors',
+    //   signal: AbortSignal.timeout(PDF_EXPORT_CONFIG.TIMEOUT),
+    // })
+    // if (!response.ok) {
+    //   throw new Error(`PDF generation failed: ${response.status}`)
+    // }
+    // const blob = await response.blob()
     const fileName = `${getSafeFileName(title)}.pdf`
     // downloadBlob(blob, fileName)
-    await downloadViaIOS(blob, fileName)
-    if (successMessage) toast.success(successMessage)
+    await downloadViaIOS(clonedElement.outerHTML, styles, pagePadding, fileName)
+    // if (successMessage) toast.success(successMessage)
     console.log(`Total export took ${performance.now() - exportStartTime}ms`)
   } catch (error) {
     console.error('Export error:', error)
-    // if (errorMessage) toast.error(errorMessage)
     toast.error((error as any).toString() || errorMessage)
   } finally {
     onEnd?.()
