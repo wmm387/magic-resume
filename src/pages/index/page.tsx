@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Plus } from 'lucide-react'
+import { BadgeCheck, Plus, Settings } from 'lucide-react'
 import { CreateResumeDrawer } from './components/CreateResumeDrawer'
 import { ResumeCardItem } from './components/ResumeCardItem'
 import { useTranslations } from '@/i18n/compat/client'
@@ -14,7 +14,7 @@ import { DEFAULT_TEMPLATES } from '@/config'
 
 export default function IndexPage() {
   const t = useTranslations()
-  const { resumes, setActiveResume, deleteResume, createResume } = useResumeStore()
+  const { setVipStatus, vipStatus, resumes, setActiveResume, deleteResume, createResume } = useResumeStore()
 
   const router = useRouter()
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
@@ -49,6 +49,16 @@ export default function IndexPage() {
     router.push(`/resume/${newId}`)
   }
 
+  const toSettings = () => {
+    window.webkit?.messageHandlers?.iOS_Resume_Mine?.postMessage()
+  }
+
+  const toVIP = () => {
+    window.webkit?.messageHandlers?.iOS_Resume_Touch_VIP?.postMessage()
+  }
+
+  window.iOS_Resume_SetVIP = setVipStatus
+
   return (
     <ScrollArea className="h-[100vh] w-full">
       <motion.div
@@ -68,18 +78,35 @@ export default function IndexPage() {
             {t('dashboard.resumes.myResume')}
           </h1>
           <div className="flex items-center space-x-2">
+            {vipStatus === 0 && (
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+              >
+                <Button
+                  variant="outline"
+                  className="!text-[#600d0b] !bg-[#fff7e4]"
+                  size="sm"
+                  onClick={() => toVIP()}
+                >
+                  <BadgeCheck className="h-4 w-4" />
+                  <span className='text-[12px] font-semibold'>开通会员</span>
+                </Button>
+              </motion.div>
+            )}
             <motion.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               transition={{ type: 'spring', stiffness: 400, damping: 17 }}
             >
               <Button
-                onClick={() => setIsCreateModalOpen(true)}
-                variant="default"
-                className="bg-gray-900 text-white hover:bg-gray-800 dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90"
+                variant="outline"
+                className="w-full text-sm !bg-white px-2.5"
+                size="sm"
+                onClick={() => toSettings()}
               >
-                <Plus className="mr-2 h-4 w-4" />
-                {t('dashboard.resumes.create')}
+                <Settings className="h-4 w-4 text-black" />
               </Button>
             </motion.div>
           </div>

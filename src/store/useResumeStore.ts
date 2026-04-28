@@ -6,10 +6,12 @@ import { blankResumeState, initialResumeState } from '@/config/initialResumeData
 import { generateUUID } from '@/utils/uuid'
 
 interface ResumeStore {
+  vipStatus: number // 0: 未开通会员, 1: 已开通会员
   resumes: Record<string, ResumeData>
   activeResumeId: string | null
   activeResume: ResumeData | null
 
+  setVipStatus: (status: number) => void
   createResume: (templateId: string | null, isBlank?: boolean) => string
   deleteResume: (resume: ResumeData) => void
   duplicateResume: (resumeId: string) => string
@@ -50,14 +52,17 @@ interface ResumeStore {
   removeCertificate: (id: string) => void
 }
 
-type PersistedResumeStore = Pick<ResumeStore, 'resumes' | 'activeResumeId'>
+type PersistedResumeStore = Pick<ResumeStore, 'vipStatus' | 'resumes' | 'activeResumeId'>
 
 export const useResumeStore = create(
   persist<ResumeStore, [], [], PersistedResumeStore>(
     (set, get) => ({
+      vipStatus: 1,
       resumes: {},
       activeResumeId: null,
       activeResume: null,
+
+      setVipStatus: (status: number) => set({ vipStatus: status }),
 
       createResume: (templateId = null, isBlank = false) => {
         let initialResumeData: any
@@ -532,17 +537,20 @@ export const useResumeStore = create(
     {
       name: 'resume-storage',
       partialize: (state): PersistedResumeStore => ({
+        vipStatus: state.vipStatus,
         resumes: state.resumes,
         activeResumeId: state.activeResumeId,
       }),
       merge: (persistedState, currentState) => {
         const persisted = persistedState as Partial<PersistedResumeStore>
+        const vipStatus = persisted.vipStatus ?? currentState.vipStatus
         const resumes = persisted.resumes ?? currentState.resumes
         const activeResumeId = persisted.activeResumeId ?? currentState.activeResumeId
 
         return {
           ...currentState,
           ...persisted,
+          vipStatus,
           resumes,
           activeResumeId,
           activeResume: activeResumeId ? (resumes[activeResumeId] ?? null) : null,
